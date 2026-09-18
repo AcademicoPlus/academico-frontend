@@ -10,6 +10,7 @@ import * as candidaturaService from '../services/candidaturaService';
 import * as avaliacaoService from '../services/avaliacaoService';
 import * as recomendacaoService from '../services/recomendacaoService';
 import * as useMeuPerfilHook from '../hooks/useMeuPerfil';
+import * as chatService from '../services/chatService';
 import type { ProjetoDetalhe } from '../services/projetoService';
 import type { UsuarioResumo } from '../services/authService';
 
@@ -19,6 +20,10 @@ vi.mock('../services/candidaturaService');
 vi.mock('../services/avaliacaoService');
 vi.mock('../services/recomendacaoService');
 vi.mock('../hooks/useMeuPerfil');
+// O chat abre uma conexão WebSocket real (SockJS) fora do escopo destes
+// testes de fluxo de candidatura — mockado para não deixar o Client STOMP
+// tentando conectar durante o render da página.
+vi.mock('../services/chatService');
 
 const CRIADOR: UsuarioResumo = {
   id: 'user-1', nome: 'Ana Criadora', curso: 'Ciência da Computação', fotoUrl: null,
@@ -68,6 +73,12 @@ describe('DetalhesProjeto', () => {
     vi.restoreAllMocks();
     vi.spyOn(projetoMembroService, 'listarMembrosDoProjeto').mockResolvedValue([]);
     vi.spyOn(recomendacaoService, 'recomendarCandidatos').mockResolvedValue([]);
+    vi.spyOn(chatService, 'listarHistoricoDoChat').mockResolvedValue([]);
+    vi.spyOn(chatService, 'criarClienteChat').mockReturnValue({
+      ativar: () => {},
+      desativar: () => {},
+      enviar: () => {},
+    });
   });
 
   it('permite que um candidato envie uma candidatura', async () => {

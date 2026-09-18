@@ -20,6 +20,7 @@ import CaixaCandidaturat from '../components/caixa-candidaturat'
 import Estrelas from '../components/Estrelas'
 import ErroCard from '../components/ErroCard'
 import ConfirmModal from '../components/ConfirmModal'
+import ChatProjeto from '../components/ChatProjeto'
 
 export default function DetalhesProjetoRota() {
   const { id } = useParams<{ id: string }>();
@@ -286,6 +287,7 @@ function DetalhesProjeto({ id }: { id: string }) {
 
   const prazo = formatarData(projeto.dataFim);
   const souCriador = meuId !== null && projeto.criador?.id === meuId;
+  const souMembro = souCriador || membros.some((m) => m.usuario?.id === meuId);
 
   return (
     <div className="max-w-5xl mx-auto pb-12 animate-fade-in">
@@ -609,6 +611,8 @@ function DetalhesProjeto({ id }: { id: string }) {
 
         </div>
       </div>
+
+      {souMembro && <ChatProjeto projetoId={id} meuId={meuId} />}
 
       {acaoConfirmavel && (
         <ConfirmModal
