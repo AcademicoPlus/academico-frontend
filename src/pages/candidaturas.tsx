@@ -26,6 +26,7 @@ export default function Candidaturas() {
 
   useEffect(() => {
     let ativo = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reseta o loading ao trocar o filtro, antes do fetch abaixo
     setCarregando(true);
     listarMinhasCandidaturas({ status: filtroStatus || undefined, tamanho: 50 })
       .then((pagina) => {

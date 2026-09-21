@@ -111,6 +111,7 @@ function DetalhesProjeto({ id }: { id: string }) {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reseta o loading ao trocar de projeto, antes do fetch abaixo
     setCarregando(true);
     setErro(null);
     carregarDados()

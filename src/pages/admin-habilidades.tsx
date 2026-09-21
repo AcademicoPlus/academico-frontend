@@ -72,6 +72,7 @@ export default function AdminHabilidades() {
       .finally(() => setCarregando(false));
   }
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- reseta o loading ao trocar filtro/página, antes do fetch em recarregar()
   useEffect(recarregar, [buscaAplicada, categoriaFiltro, pagina]);
 
   function iniciarEdicao(habilidade: Habilidade) {

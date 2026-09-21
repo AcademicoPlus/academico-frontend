@@ -7,7 +7,7 @@ import * as recomendacaoService from '../services/recomendacaoService';
 import * as projetoService from '../services/projetoService';
 import * as candidaturaService from '../services/candidaturaService';
 import * as useMeuPerfilHook from '../hooks/useMeuPerfil';
-import * as toastContext from '../context/ToastContext';
+import * as toastContext from '../hooks/useToast';
 import type { UsuarioPerfil } from '../services/usuarioService';
 import type { PaginaResposta } from '../services/apiClient';
 import type { Projeto } from '../services/projetoService';
@@ -16,7 +16,7 @@ vi.mock('../services/recomendacaoService');
 vi.mock('../services/projetoService');
 vi.mock('../services/candidaturaService');
 vi.mock('../hooks/useMeuPerfil');
-vi.mock('../context/ToastContext');
+vi.mock('../hooks/useToast');
 
 const PERFIL = { id: 'user-1', nome: 'Ana Silva' } as UsuarioPerfil;
 

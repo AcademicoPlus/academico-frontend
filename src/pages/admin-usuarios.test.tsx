@@ -8,6 +8,7 @@ import * as usuarioService from '../services/usuarioService';
 import * as nivelAcessoService from '../services/nivelAcessoService';
 import * as useMeuPerfilHook from '../hooks/useMeuPerfil';
 import type { UsuarioResumo } from '../services/authService';
+import type { UsuarioPerfil } from '../services/usuarioService';
 
 vi.mock('../services/usuarioService');
 vi.mock('../services/nivelAcessoService');
@@ -52,7 +53,7 @@ function renderPagina() {
 describe('AdminUsuarios', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.spyOn(useMeuPerfilHook, 'useMeuPerfil').mockReturnValue({ data: { id: 'algum-id' } } as any);
+    vi.spyOn(useMeuPerfilHook, 'useMeuPerfil').mockReturnValue({ data: { id: 'algum-id' } } as never);
   });
 
   it('carrega e lista os usuários numa tabela', async () => {
@@ -69,7 +70,7 @@ describe('AdminUsuarios', () => {
   it('altera o nível de acesso de um usuário e salva', async () => {
     vi.spyOn(usuarioService, 'listarTodosOsUsuarios').mockResolvedValue([USUARIO_1]);
     vi.spyOn(nivelAcessoService, 'listarNiveisDeAcesso').mockResolvedValue(NIVEIS);
-    vi.spyOn(usuarioService, 'alterarNivelDeAcesso').mockResolvedValue({} as any);
+    vi.spyOn(usuarioService, 'alterarNivelDeAcesso').mockResolvedValue({} as UsuarioPerfil);
 
     renderPagina();
 

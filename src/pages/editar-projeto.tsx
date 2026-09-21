@@ -109,6 +109,7 @@ function EditarProjeto({ id }: { id: string }) {
   // catálogo inteiro de uma vez, só a fatia que combina com o termo digitado.
   useEffect(() => {
     if (buscaHabilidade.trim().length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- limpa as sugestões ao esvaziar a busca
       setSugestoes([]);
       return;
     }

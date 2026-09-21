@@ -1,18 +1,11 @@
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
-
-export type TipoToast = 'erro' | 'sucesso' | 'info';
+import { useCallback, useState, type ReactNode } from 'react';
+import { ToastContext, type TipoToast } from './toast-context-value';
 
 type Toast = {
   id: number;
   mensagem: string;
   tipo: TipoToast;
 };
-
-type ToastContextValor = {
-  mostrarToast: (mensagem: string, tipo?: TipoToast) => void;
-};
-
-const ToastContext = createContext<ToastContextValor | null>(null);
 
 let proximoId = 1;
 
@@ -49,12 +42,4 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       </div>
     </ToastContext.Provider>
   );
-}
-
-export function useToast() {
-  const contexto = useContext(ToastContext);
-  if (!contexto) {
-    throw new Error('useToast precisa ser usado dentro de um ToastProvider');
-  }
-  return contexto;
 }

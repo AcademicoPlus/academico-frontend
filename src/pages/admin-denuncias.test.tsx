@@ -75,7 +75,6 @@ describe('AdminDenuncias', () => {
   });
 
   it('resolve uma denúncia como procedente após confirmação', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
     vi.spyOn(denunciaService, 'listarDenunciasPendentes').mockResolvedValue({
       content: [DENUNCIA], totalElements: 1, totalPages: 1, number: 0, size: 10, last: true,
     });
@@ -85,6 +84,9 @@ describe('AdminDenuncias', () => {
 
     await screen.findByText(/Ana Silva denunciou/i);
     await userEvent.click(screen.getByRole('button', { name: /marcar procedente/i }));
+
+    await screen.findByRole('dialog');
+    await userEvent.click(screen.getByRole('button', { name: /^confirmar$/i }));
 
     await waitFor(() =>
       expect(denunciaService.resolverDenuncia).toHaveBeenCalledWith('den-1', true),

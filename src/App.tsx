@@ -30,6 +30,7 @@ import Admin from './pages/admin'
 import AdminUsuarios from './pages/admin-usuarios'
 import AdminHabilidades from './pages/admin-habilidades'
 import AdminDenuncias from './pages/admin-denuncias'
+import NaoEncontrado from './pages/nao-encontrado'
 
 export default function App() {
   return (
@@ -73,6 +74,9 @@ export default function App() {
 
           </Route>
         </Route>
+
+        {/* Qualquer rota não mapeada cai na página 404 */}
+        <Route path="*" element={<NaoEncontrado />} />
       </Routes>
     </BrowserRouter>
   )

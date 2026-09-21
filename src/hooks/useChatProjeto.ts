@@ -14,6 +14,7 @@ export function useChatProjeto(projetoId: string, habilitado: boolean) {
     if (!habilitado) return;
 
     let cancelado = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reseta o loading ao trocar de projeto/habilitar, antes do fetch abaixo
     setCarregando(true);
     setErro(null);
 

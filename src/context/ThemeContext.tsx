@@ -1,15 +1,7 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-
-export type Tema = 'light' | 'dark';
+import { useEffect, useState, type ReactNode } from 'react';
+import { ThemeContext, type Tema } from './theme-context-value';
 
 const CHAVE_ARMAZENAMENTO = 'academico:tema';
-
-type ThemeContextValor = {
-  tema: Tema;
-  alternarTema: () => void;
-};
-
-const ThemeContext = createContext<ThemeContextValor | null>(null);
 
 function lerTemaInicial(): Tema {
   const salvo = localStorage.getItem(CHAVE_ARMAZENAMENTO);
@@ -32,12 +24,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }
 
   return <ThemeContext.Provider value={{ tema, alternarTema }}>{children}</ThemeContext.Provider>;
-}
-
-export function useTheme() {
-  const contexto = useContext(ThemeContext);
-  if (!contexto) {
-    throw new Error('useTheme precisa ser usado dentro de um ThemeProvider');
-  }
-  return contexto;
 }

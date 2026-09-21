@@ -32,6 +32,7 @@ export default function MenuLateral({ isOpen = false, onClose = () => {} }: Menu
     try {
       await logout();
     } catch {
+      // Ignora falha no logout remoto — o token local é removido de todo modo abaixo.
     } finally {
       removerToken();
       queryClient.clear();
