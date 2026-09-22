@@ -436,7 +436,7 @@ function DetalhesProjeto({ id }: { id: string }) {
             {/* Candidaturas recebidas (só o criador do projeto vê) */}
             {souCriador && (
               <>
-                <h2 className="text-xl font-bold text-[#183E6C] dark:text-blue-300 mb-4 mt-8">
+                <h2 className="text-xl font-bold text-primary dark:text-purple-400 mb-4 mt-8">
                   Candidaturas Pendentes {candidaturasPendentes.length > 0 && `(${candidaturasPendentes.length})`}
                 </h2>
 
@@ -447,19 +447,22 @@ function DetalhesProjeto({ id }: { id: string }) {
                 ) : (
                   <div className="flex flex-col gap-4">
                     {candidaturasPendentes.map((candidatura) => (
-                      <div key={candidatura.id} className="bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 p-5 rounded-2xl">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-full bg-[#183E6C] text-white flex items-center justify-center text-sm font-black shrink-0">
+                      <div
+                        key={candidatura.id}
+                        className="bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200"
+                      >
+                        <div className="flex items-center gap-3.5 mb-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary via-[#6F60FA] to-[#9286FF] text-white flex items-center justify-center text-sm font-black shadow-xs ring-2 ring-primary/20 dark:ring-primary/30 shrink-0 select-none">
                             {candidatura.usuario ? iniciaisDoNome(candidatura.usuario.nome) : '?'}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-bold text-[#183E6C] dark:text-blue-300 truncate">{candidatura.usuario?.nome ?? 'Usuário removido'}</p>
+                            <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{candidatura.usuario?.nome ?? 'Usuário removido'}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{candidatura.usuario?.curso ?? '—'}</p>
                           </div>
                         </div>
 
                         {candidatura.mensagem && (
-                          <p className="text-sm text-gray-600 dark:text-gray-300 italic bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl p-3 mb-3">
+                          <p className="text-sm text-gray-600 dark:text-gray-300 italic bg-background dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/70 rounded-xl p-3 mb-3">
                             "{candidatura.mensagem}"
                           </p>
                         )}
@@ -468,14 +471,14 @@ function DetalhesProjeto({ id }: { id: string }) {
                           <button
                             type="button"
                             onClick={() => { setErroAcao(null); setMotivoRejeicao(''); setAcaoConfirmavel({ tipo: 'rejeitarCandidatura', candidatura }); }}
-                            className="px-4 py-2 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                            className="px-4 py-2 rounded-xl text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 border border-transparent hover:border-red-200 dark:hover:border-red-900/40 transition-all cursor-pointer"
                           >
                             Rejeitar
                           </button>
                           <button
                             type="button"
                             onClick={() => { setErroAcao(null); setAcaoConfirmavel({ tipo: 'aceitarCandidatura', candidatura }); }}
-                            className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#183E6C] hover:bg-[#102a4a] transition-colors"
+                            className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-primary hover:bg-[#4E3FE4] shadow-sm hover:shadow-md shadow-primary/20 transition-all cursor-pointer"
                           >
                             Aceitar
                           </button>
@@ -642,7 +645,7 @@ function DetalhesProjeto({ id }: { id: string }) {
               placeholder="Motivo da rejeição (mínimo 5 caracteres)..."
               value={motivoRejeicao}
               onChange={(e) => setMotivoRejeicao(e.target.value)}
-              className="w-full p-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 resize-none text-sm text-gray-700 dark:text-gray-100"
+              className="w-full p-3 bg-background dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 resize-none text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-all"
             />
           )}
           {(erroAcao || erroCandidatura) && <ErroCard>{erroAcao || erroCandidatura}</ErroCard>}
