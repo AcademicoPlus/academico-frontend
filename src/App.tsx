@@ -20,6 +20,7 @@ import Projetos from './pages/projetos'
 import ExplorarPessoas from './pages/ExplorarPessoas';
 import DetalhesProjeto from './pages/detalhes-projeto'
 import Candidaturas from './pages/candidaturas'
+import Mensagens from './pages/mensagens'
 import EditarPerfil from './pages/EditarPerfil';
 import Perfil from './pages/Perfil';
 import CriarProjeto from './pages/criar-projeto'
@@ -60,6 +61,8 @@ export default function App() {
             <Route path="/detalhes/:id" element={<DetalhesProjeto />} />
 
             <Route path="/candidaturas" element={<Candidaturas />} />
+            <Route path="/mensagens" element={<Mensagens />} />
+            <Route path="/mensagens/:projetoId" element={<Mensagens />} />
 
             <Route path="/criar-projeto" element={<CriarProjeto />} />
             <Route path="/editar-projeto/:id" element={<EditarProjeto />} />

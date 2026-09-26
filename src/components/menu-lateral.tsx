@@ -1,6 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { listarMeusProjetos, type Projeto } from '../services/projetoService'
+import { listarProjetosVinculados, type Projeto } from '../services/projetoService'
+import { EVENTO_CONVITES_ATUALIZADOS } from '../services/conviteService'
+import { contarMensagensNaoLidas, EVENTO_MENSAGENS_ATUALIZADAS } from '../services/chatService'
 import { useMeuPerfil } from '../hooks/useMeuPerfil';
 import { logout } from '../services/usuarioService';
 import { removerToken } from '../utils/auth';
@@ -20,12 +22,37 @@ export default function MenuLateral({ isOpen = false, onClose = () => {} }: Menu
   
   const { data: meuPerfil } = useMeuPerfil();
 
+  // O menu fica montado entre as páginas: recarrega a cada navegação (ex.:
+  // depois de ser aceito, sair ou criar um projeto) e ao responder um convite.
   useEffect(() => {
-    listarMeusProjetos({ tamanho: 5 })
-      .then((pagina) => setMeusProjetos(pagina.content))
-      .catch(() => { })
-      .finally(() => setCarregandoProjetos(false));
-  }, []);
+    const carregar = () => {
+      listarProjetosVinculados({ tamanho: 5 })
+        .then((pagina) => setMeusProjetos(pagina.content))
+        .catch(() => { })
+        .finally(() => setCarregandoProjetos(false));
+    };
+    carregar();
+    window.addEventListener(EVENTO_CONVITES_ATUALIZADOS, carregar);
+    return () => window.removeEventListener(EVENTO_CONVITES_ATUALIZADOS, carregar);
+  }, [location.pathname]);
+
+  // Badge de "Mensagens": na navegação, a cada 30s e quando a caixa de
+  // mensagens avisa que algo mudou (leitura ou mensagem nova).
+  const [mensagensNaoLidas, setMensagensNaoLidas] = useState(0);
+  useEffect(() => {
+    const atualizar = () => {
+      contarMensagensNaoLidas()
+        .then((r) => setMensagensNaoLidas(r.total))
+        .catch(() => { });
+    };
+    atualizar();
+    const intervalo = window.setInterval(atualizar, 30_000);
+    window.addEventListener(EVENTO_MENSAGENS_ATUALIZADAS, atualizar);
+    return () => {
+      window.clearInterval(intervalo);
+      window.removeEventListener(EVENTO_MENSAGENS_ATUALIZADAS, atualizar);
+    };
+  }, [location.pathname]);
 
   async function handleSair() {
     setSaindo(true);
@@ -79,6 +106,19 @@ export default function MenuLateral({ isOpen = false, onClose = () => {} }: Menu
               Minhas Candidaturas
             </Link>
 
+            <Link to="/mensagens" onClick={onClose} className={`flex items-center gap-3 px-4 py-3.5 rounded-xl ${location.pathname.startsWith('/mensagens') ? activeClass : inactiveClass}`}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4-.83L3 20l1.4-3.72A7.96 7.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+              <span className="flex-1">Mensagens</span>
+              {mensagensNaoLidas > 0 && (
+                <span
+                  aria-label={`${mensagensNaoLidas} mensagens não lidas`}
+                  className="min-w-5 h-5 px-1.5 rounded-full bg-[#F27405] text-white text-[11px] font-bold flex items-center justify-center"
+                >
+                  {mensagensNaoLidas > 99 ? '99+' : mensagensNaoLidas}
+                </span>
+              )}
+            </Link>
+
             <Link to="/pessoas" onClick={onClose} className={`flex items-center gap-3 px-4 py-3.5 rounded-xl ${location.pathname === '/pessoas' ? activeClass : inactiveClass}`}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
               Encontrar Pessoas
@@ -118,7 +158,10 @@ export default function MenuLateral({ isOpen = false, onClose = () => {} }: Menu
                       className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 font-medium hover:text-[#F27405] hover:bg-gray-50 dark:hover:bg-slate-800 py-2.5 px-3 -mx-3 rounded-lg transition-all group"
                     >
                       <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-slate-600 group-hover:bg-[#F27405] transition-colors shrink-0"></div>
-                      <span className="truncate">{proj.titulo}</span>
+                      <span className="truncate flex-1">{proj.titulo}</span>
+                      {meuPerfil && proj.criador?.id !== meuPerfil.id && (
+                        <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500 shrink-0">Membro</span>
+                      )}
                     </Link>
                   </li>
                 ))

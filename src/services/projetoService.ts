@@ -63,6 +63,12 @@ export function listarMeusProjetos(filtro: FiltroProjetos = {}): Promise<PaginaR
   return apiFetch<PaginaResposta<Projeto>>(`/projetos/meus-projetos${paraQuery(filtro)}`);
 }
 
+// Criados por mim + aqueles em que sou membro — é o que aparece como "Meus
+// Projetos" no dashboard e no menu lateral. Aceita filtro de status.
+export function listarProjetosVinculados(filtro: FiltroProjetos = {}): Promise<PaginaResposta<Projeto>> {
+  return apiFetch<PaginaResposta<Projeto>>(`/projetos/vinculados${paraQuery(filtro)}`);
+}
+
 export function listarProjetosParticipando(filtro: FiltroProjetos = {}): Promise<PaginaResposta<Projeto>> {
   return apiFetch<PaginaResposta<Projeto>>(`/projetos/participando${paraQuery(filtro)}`);
 }
@@ -100,6 +106,10 @@ export function enviarBannerDoProjeto(id: string, arquivo: File): Promise<Projet
   const formData = new FormData();
   formData.append('banner', arquivo);
   return apiFetch<ProjetoDetalhe>(`/projetos/${id}/banner`, { method: 'POST', body: formData });
+}
+
+export function removerBannerDoProjeto(id: string): Promise<ProjetoDetalhe> {
+  return apiFetch<ProjetoDetalhe>(`/projetos/${id}/banner`, { method: 'DELETE' });
 }
 
 // Espelha CriarProjetoRequest (dto/projeto). "habilidades" é opcional: já

@@ -80,6 +80,10 @@ export function enviarFotoDePerfil(arquivo: File): Promise<UsuarioPerfil> {
   return apiFetch<UsuarioPerfil>('/usuarios/me/foto', { method: 'POST', body: formData });
 }
 
+export function removerFotoDePerfil(): Promise<UsuarioPerfil> {
+  return apiFetch<UsuarioPerfil>('/usuarios/me/foto', { method: 'DELETE' });
+}
+
 // Exclusão lógica da própria conta (LGPD) — exige a senha atual pra confirmar.
 export function excluirMinhaConta(senha: string): Promise<MensagemResponse> {
   return apiFetch<MensagemResponse>('/usuarios/me', { method: 'DELETE', body: { senha } });

@@ -47,10 +47,7 @@ describe('Dashboard', () => {
   });
 
   it('carrega e mostra os projetos próprios e as recomendações', async () => {
-    vi.spyOn(projetoService, 'listarMeusProjetos').mockImplementation((filtro) => {
-      if (filtro?.status === 'ABERTO') {
-        return Promise.resolve(paginaVazia());
-      }
+    vi.spyOn(projetoService, 'listarProjetosVinculados').mockImplementation(() => {
       return Promise.resolve(
         paginaProjetos([
           {
@@ -101,8 +98,28 @@ describe('Dashboard', () => {
     expect(screen.getByText('Bruno Alves')).toBeInTheDocument();
   });
 
+  it('inclui projetos em que participo como membro, com a etiqueta "Membro"', async () => {
+    const base = { descricao: 'd', bannerUrl: null, status: 'ABERTO' as const, habilidadesNecessarias: [], vagas: 3, vagasPreenchidas: 1, dataFim: null };
+    vi.spyOn(projetoService, 'listarProjetosVinculados').mockResolvedValue({
+      ...paginaProjetos([
+        { ...base, id: 'proj-meu', titulo: 'Projeto Criado', criador: { id: 'user-1', nome: 'Ana Silva', curso: null, fotoUrl: null, permission: 'ALUNO', periodo: null, notaMedia: null, totalAvaliacoes: null } },
+        { ...base, id: 'proj-membro', titulo: 'Projeto Aceito', criador: { id: 'user-9', nome: 'Outra Pessoa', curso: null, fotoUrl: null, permission: 'ALUNO', periodo: null, notaMedia: null, totalAvaliacoes: null } },
+      ]),
+      totalElements: 2,
+    });
+    vi.spyOn(recomendacaoService, 'recomendarProjetos').mockResolvedValue([]);
+    vi.spyOn(candidaturaService, 'listarMinhasCandidaturas').mockResolvedValue(paginaVazia());
+
+    renderPagina();
+
+    expect(await screen.findByText('Projeto Aceito')).toBeInTheDocument();
+    expect(screen.getByText('Projeto Criado')).toBeInTheDocument();
+    expect(screen.getAllByText('Membro')).toHaveLength(1);
+    expect(screen.getByText('2')).toBeInTheDocument();
+  });
+
   it('mostra um toast de erro quando não consegue carregar os projetos próprios', async () => {
-    vi.spyOn(projetoService, 'listarMeusProjetos').mockRejectedValue(new Error('falhou'));
+    vi.spyOn(projetoService, 'listarProjetosVinculados').mockRejectedValue(new Error('falhou'));
     vi.spyOn(recomendacaoService, 'recomendarProjetos').mockResolvedValue([]);
     vi.spyOn(candidaturaService, 'listarMinhasCandidaturas').mockResolvedValue(paginaVazia());
 

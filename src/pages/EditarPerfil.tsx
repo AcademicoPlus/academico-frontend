@@ -11,8 +11,10 @@ import {
   alterarMinhaSenha,
   excluirMinhaConta,
   enviarFotoDePerfil,
+  removerFotoDePerfil,
   type UsuarioPerfil,
 } from '../services/usuarioService';
+import ConfirmModal from '../components/ConfirmModal';
 import { removerToken } from '../utils/auth';
 import {
   obterMeuPerfilCache,
@@ -260,6 +262,8 @@ export default function EditarPerfil() {
   const [fotoUrl, setFotoUrl] = useState<string | null>(null);
   const [enviandoFoto, setEnviandoFoto] = useState(false);
   const [erroFoto, setErroFoto] = useState<string | null>(null);
+  const [removendoFoto, setRemovendoFoto] = useState(false);
+  const [confirmandoRemocaoFoto, setConfirmandoRemocaoFoto] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ── Cursos e Campos do formulário ──────────────────────────────────────────
@@ -396,6 +400,24 @@ export default function EditarPerfil() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    }
+  }
+
+  async function handleRemoverFoto() {
+    setErroFoto(null);
+    setRemovendoFoto(true);
+    try {
+      const atualizado = await removerFotoDePerfil();
+      setFotoUrl(atualizado.fotoUrl ?? null);
+      setPerfil(atualizado);
+      atualizarCacheMeuPerfil(atualizado);
+      setConfirmandoRemocaoFoto(false);
+    } catch (err) {
+      setErroFoto(
+        err instanceof ApiError ? err.message : 'Falha ao remover foto de perfil.',
+      );
+    } finally {
+      setRemovendoFoto(false);
     }
   }
 
@@ -649,6 +671,16 @@ export default function EditarPerfil() {
                 </svg>
                 <span>{enviandoFoto ? 'Enviando foto…' : 'Alterar foto'}</span>
               </label>
+              {fotoUrl && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmandoRemocaoFoto(true)}
+                  disabled={enviandoFoto || removendoFoto}
+                  className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  Remover foto
+                </button>
+              )}
               <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium text-center sm:text-right">
                 JPG ou PNG · máx. 2 MB
               </span>
@@ -1198,6 +1230,17 @@ export default function EditarPerfil() {
         )}
       </section>
 
+      {confirmandoRemocaoFoto && (
+        <ConfirmModal
+          titulo="Remover foto de perfil"
+          mensagem="Tem certeza que deseja remover sua foto de perfil? Você poderá enviar uma nova a qualquer momento."
+          variante="perigo"
+          confirmando={removendoFoto}
+          textoConfirmar="Remover foto"
+          onCancelar={() => setConfirmandoRemocaoFoto(false)}
+          onConfirmar={handleRemoverFoto}
+        />
+      )}
     </div>
   );
 }

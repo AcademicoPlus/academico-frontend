@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { recomendarProjetos, type ProjetoRecomendado } from '../services/recomendacaoService'
-import { listarMeusProjetos, type Projeto } from '../services/projetoService'
+import { listarProjetosVinculados, type Projeto } from '../services/projetoService'
 import { useMeuPerfil } from '../hooks/useMeuPerfil'
 import { listarMinhasCandidaturas } from '../services/candidaturaService'
 import { STATUS_PROJETO_BADGE, STATUS_PROJETO_LABEL } from '../utils/projeto'
@@ -123,8 +123,12 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    listarMeusProjetos({ tamanho: 3 })
-      .then((pagina) => setMeusProjetos(pagina.content))
+    // Criados por mim + os que participo; o total também alimenta o contador do perfil.
+    listarProjetosVinculados({ tamanho: 3 })
+      .then((pagina) => {
+        setMeusProjetos(pagina.content);
+        setTotalProjetosAtivos(pagina.totalElements);
+      })
       .catch((erro) => mostrarToast(mensagemErro(erro), 'erro'))
       .finally(() => setCarregandoMeusProjetos(false));
 
@@ -137,9 +141,6 @@ export default function Dashboard() {
       .then((pagina) => setTotalCandidaturasPendentes(pagina.totalElements))
       .catch((erro) => mostrarToast(mensagemErro(erro), 'erro'));
 
-    listarMeusProjetos({ status: 'ABERTO', tamanho: 1 })
-      .then((pagina) => setTotalProjetosAtivos(pagina.totalElements))
-      .catch((erro) => mostrarToast(mensagemErro(erro), 'erro'));
   }, [mostrarToast]);
 
   const primeiroNome = meuPerfil?.nome?.split(' ')[0] || '';
@@ -226,7 +227,7 @@ export default function Dashboard() {
                 </div>
               ) : meusProjetos.length === 0 ? (
                 <EstadoVazio
-                  titulo="Você ainda não criou nenhum projeto."
+                  titulo="Você ainda não participa de nenhum projeto."
                   className="py-8"
                   acao={<Link to="/criar-projeto" className="text-[#F27405] font-bold hover:underline text-sm">Criar o primeiro →</Link>}
                 />
@@ -242,7 +243,12 @@ export default function Dashboard() {
                           
                           {/* Área do Título e Habilidades */}
                           <div className="flex-1 w-full min-w-0">
-                            <h3 className="font-bold text-[#183E6C] dark:text-blue-300 text-base truncate">{proj.titulo}</h3>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <h3 className="font-bold text-[#183E6C] dark:text-blue-300 text-base truncate">{proj.titulo}</h3>
+                              {meuPerfil && proj.criador && proj.criador.id !== meuPerfil.id && (
+                                <span className="text-[10px] bg-orange-50 dark:bg-orange-950/40 text-[#F27405] px-2 py-0.5 rounded-full font-bold uppercase shrink-0">Membro</span>
+                              )}
+                            </div>
                             <div className="flex flex-wrap gap-2 mt-2">
                               {proj.habilidadesNecessarias.slice(0, 3).map((h) => (
                                 <span key={h.id} className="text-[10px] bg-blue-50 dark:bg-blue-900/40 text-[#183E6C] dark:text-blue-300 px-2 py-1 rounded font-bold border border-blue-100 dark:border-blue-800">

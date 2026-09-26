@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import logo from '../assets/logo.png';
-import NotificationDropdown from './NotificationDropdown'; // O novo componente que vamos criar
+import NotificationDropdown from './NotificationDropdown';
+import { contarConvitesPendentes, EVENTO_CONVITES_ATUALIZADOS } from '../services/conviteService';
 import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
@@ -11,8 +12,21 @@ export default function Header({ onToggleMenu }: HeaderProps) {
   // Estado para controlar se a janela (dropdown) está aberta ou fechada
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
-  // Simula se há notificações (futuramente, isso deve vir de uma API ou Contexto)
-  const hasNotifications = true;
+  // Por enquanto, notificações = convites de projeto pendentes. Recarrega ao
+  // abrir o sininho e quando algum convite é respondido em outra tela.
+  const [convitesPendentes, setConvitesPendentes] = useState(0);
+  const hasNotifications = convitesPendentes > 0;
+
+  useEffect(() => {
+    const atualizar = () => {
+      contarConvitesPendentes()
+        .then((r) => setConvitesPendentes(r.pendentes))
+        .catch(() => setConvitesPendentes(0));
+    };
+    atualizar();
+    window.addEventListener(EVENTO_CONVITES_ATUALIZADOS, atualizar);
+    return () => window.removeEventListener(EVENTO_CONVITES_ATUALIZADOS, atualizar);
+  }, []);
 
   return (
     <header className="bg-white dark:bg-slate-900 h-16 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between px-6 sticky top-0 z-50">

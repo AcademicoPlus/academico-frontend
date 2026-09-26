@@ -20,6 +20,8 @@ import type { UsuarioPerfil } from './usuarioService';
 import type { NivelAcesso } from './nivelAcessoService';
 import type { Denuncia } from './denunciaService';
 import type { Candidatura } from './candidaturaService';
+import type { Convite } from './conviteService';
+import type { Conversa, MensagemProjeto } from './chatService';
 import type { PaginaResposta } from './apiClient';
 
 // Latência artificial pra tela de fato passar pelo estado de "carregando".
@@ -478,6 +480,170 @@ function mockListarHabilidades(query: URLSearchParams): Promise<PaginaResposta<H
   });
 }
 
+// "Banco" em memória dos convites de projeto. Seed: Maria (criadora do
+// projeto-seed-3) já convidou o usuário logado, pra o sininho ter conteúdo.
+const CONVITES_MOCK: Convite[] = [
+  {
+    id: 'convite-seed-1',
+    projeto: { id: 'projeto-seed-3', titulo: '', status: 'ABERTO' },
+    convidado: USUARIO_LOGADO_MOCK,
+    convidante: MARIA_COSTA_MOCK,
+    funcao: 'Frontend',
+    mensagem: 'Vi seu perfil e acho que você combina com o projeto!',
+    status: 'PENDENTE',
+    criadoEm: '2026-09-20T10:00:00Z',
+    respondidoEm: null,
+  },
+];
+
+// Rotas /convites/* — devolve null quando a rota não é de convite.
+function mockConvites(method: string, caminhoBase: string, parametros: URLSearchParams, body: unknown): Promise<unknown> | null {
+  const comTitulo = (c: Convite): Convite => {
+    const projeto = PROJETOS_MOCK.find((p) => p.id === c.projeto.id);
+    return projeto ? { ...c, projeto: { id: projeto.id, titulo: projeto.titulo, status: projeto.status } } : c;
+  };
+  const filtrarStatus = (lista: Convite[]) => {
+    const status = parametros.get('status');
+    return status ? lista.filter((c) => c.status === status) : lista;
+  };
+
+  if (method === 'GET' && caminhoBase === '/convites/recebidos') {
+    const recebidos = CONVITES_MOCK.filter((c) => c.convidado?.id === USUARIO_LOGADO_MOCK.id);
+    return resolverComAtraso(paginar(filtrarStatus(recebidos).map(comTitulo)));
+  }
+
+  if (method === 'GET' && caminhoBase === '/convites/recebidos/contagem') {
+    const pendentes = CONVITES_MOCK.filter((c) => c.convidado?.id === USUARIO_LOGADO_MOCK.id && c.status === 'PENDENTE').length;
+    return resolverComAtraso({ pendentes });
+  }
+
+  const matchDoProjeto = method === 'GET' && caminhoBase.match(/^\/convites\/projeto\/([^/]+)$/);
+  if (matchDoProjeto) {
+    const doProjeto = CONVITES_MOCK.filter((c) => c.projeto.id === matchDoProjeto[1]);
+    return resolverComAtraso(paginar(filtrarStatus(doProjeto).map(comTitulo)));
+  }
+
+  if (method === 'POST' && caminhoBase === '/convites') {
+    const dados = body as { projetoId: string; usuarioId: string; funcao?: string; mensagem?: string };
+    const projeto = PROJETOS_MOCK.find((p) => p.id === dados.projetoId);
+    const convidado = USUARIOS_ADMIN_MOCK.find((u) => u.id === dados.usuarioId)
+      ?? USUARIOS_MOCK.find((u) => u.id === dados.usuarioId);
+    if (!projeto || !convidado) {
+      return rejeitarComAtraso(new ApiError(404, 'Projeto ou usuário não encontrado.'));
+    }
+    if (CONVITES_MOCK.some((c) => c.projeto.id === projeto.id && c.convidado?.id === convidado.id && c.status === 'PENDENTE')) {
+      return rejeitarComAtraso(new ApiError(400, 'Já existe um convite pendente para este usuário.'));
+    }
+    const novo: Convite = {
+      id: `convite-mock-${Date.now()}`,
+      projeto: { id: projeto.id, titulo: projeto.titulo, status: projeto.status },
+      convidado: convidado as UsuarioResumo,
+      convidante: projeto.criador,
+      funcao: dados.funcao ?? null,
+      mensagem: dados.mensagem ?? null,
+      status: 'PENDENTE',
+      criadoEm: new Date().toISOString(),
+      respondidoEm: null,
+    };
+    CONVITES_MOCK.push(novo);
+    return resolverComAtraso(clonar(novo));
+  }
+
+  const matchResposta = method === 'PATCH' && caminhoBase.match(/^\/convites\/([^/]+)\/(aceitar|recusar|cancelar)$/);
+  if (matchResposta) {
+    const convite = CONVITES_MOCK.find((c) => c.id === matchResposta[1]);
+    if (!convite) {
+      return rejeitarComAtraso(new ApiError(404, 'Convite não encontrado.'));
+    }
+    if (convite.status !== 'PENDENTE') {
+      return rejeitarComAtraso(new ApiError(400, 'Este convite já foi respondido.'));
+    }
+    const acao = matchResposta[2];
+    convite.status = acao === 'aceitar' ? 'ACEITO' : acao === 'recusar' ? 'RECUSADO' : 'CANCELADO';
+    convite.respondidoEm = new Date().toISOString();
+
+    const projeto = PROJETOS_MOCK.find((p) => p.id === convite.projeto.id);
+    if (acao === 'aceitar' && projeto && convite.convidado) {
+      const membrosDoProjeto = MEMBROS_MOCK[projeto.id] ?? (MEMBROS_MOCK[projeto.id] = membrosDoProjetoMock(projeto));
+      membrosDoProjeto.push({
+        id: `membro-mock-${Date.now()}`,
+        projeto: null,
+        usuario: convite.convidado,
+        funcao: convite.funcao,
+        dataAdesao: new Date().toISOString(),
+      });
+      projeto.vagasPreenchidas += 1;
+      projeto.vagasDisponiveis = Math.max(0, projeto.vagas - projeto.vagasPreenchidas);
+      projeto.totalMembros += 1;
+    }
+    return resolverComAtraso(clonar(comTitulo(convite)));
+  }
+
+  return null;
+}
+
+// "Banco" em memória do chat. Seed: conversa no projeto-seed-2 (criado pelo
+// usuário logado) com mensagens do Lucas, ainda não lidas.
+const MENSAGENS_MOCK: MensagemProjeto[] = [
+  { id: 'msg-seed-1', projetoId: 'projeto-seed-2', autor: LUCAS_MENDES_MOCK, conteudo: 'Oi! Vi que o backend já está no ar 🎉', criadoEm: new Date(Date.now() - 26 * 3600_000).toISOString() },
+  { id: 'msg-seed-2', projetoId: 'projeto-seed-2', autor: USUARIO_LOGADO_MOCK, conteudo: 'Sim! Falta só o deploy.', criadoEm: new Date(Date.now() - 25 * 3600_000).toISOString() },
+  { id: 'msg-seed-3', projetoId: 'projeto-seed-2', autor: LUCAS_MENDES_MOCK, conteudo: 'Fechado. Apresentamos na sexta?', criadoEm: new Date(Date.now() - 20 * 60_000).toISOString() },
+  { id: 'msg-seed-4', projetoId: 'projeto-seed-2', autor: LUCAS_MENDES_MOCK, conteudo: 'Posso fazer os slides.', criadoEm: new Date(Date.now() - 19 * 60_000).toISOString() },
+];
+const LEITURAS_MOCK: Record<string, string> = {
+  'projeto-seed-2': new Date(Date.now() - 24 * 3600_000).toISOString(),
+};
+
+function conversasMock(): Conversa[] {
+  const meus = PROJETOS_MOCK.filter((p) =>
+    p.criador?.id === USUARIO_LOGADO_MOCK.id || membrosDoProjetoMock(p).some((m) => m.usuario?.id === USUARIO_LOGADO_MOCK.id),
+  );
+  return meus
+    .map((p) => {
+      const doProjeto = MENSAGENS_MOCK.filter((m) => m.projetoId === p.id);
+      const lidoAte = LEITURAS_MOCK[p.id];
+      return {
+        projeto: { id: p.id, titulo: p.titulo, status: p.status },
+        bannerUrl: p.bannerUrl,
+        ultimaMensagem: doProjeto[doProjeto.length - 1] ?? null,
+        naoLidas: doProjeto.filter((m) => m.autor?.id !== USUARIO_LOGADO_MOCK.id && (!lidoAte || m.criadoEm > lidoAte)).length,
+      };
+    })
+    .sort((a, b) => (b.ultimaMensagem?.criadoEm ?? '').localeCompare(a.ultimaMensagem?.criadoEm ?? ''));
+}
+
+// Rotas do chat — devolve null quando a rota não é do chat.
+function mockChat(method: string, caminhoBase: string, body: unknown): Promise<unknown> | null {
+  if (method === 'GET' && caminhoBase === '/conversas') {
+    return resolverComAtraso(conversasMock());
+  }
+  if (method === 'GET' && caminhoBase === '/conversas/nao-lidas') {
+    return resolverComAtraso({ total: conversasMock().reduce((soma, c) => soma + c.naoLidas, 0) });
+  }
+  const matchLida = method === 'PUT' && caminhoBase.match(/^\/conversas\/([^/]+)\/lida$/);
+  if (matchLida) {
+    LEITURAS_MOCK[matchLida[1]] = new Date().toISOString();
+    return resolverComAtraso(undefined);
+  }
+  const matchMensagens = caminhoBase.match(/^\/projetos\/([^/]+)\/mensagens$/);
+  if (matchMensagens && method === 'GET') {
+    return resolverComAtraso(clonar(MENSAGENS_MOCK.filter((m) => m.projetoId === matchMensagens[1])));
+  }
+  // Só existe no mock: substitui o SEND do STOMP (ver criarClienteMock em chatService).
+  if (matchMensagens && method === 'POST') {
+    const nova: MensagemProjeto = {
+      id: `msg-mock-${Date.now()}`,
+      projetoId: matchMensagens[1],
+      autor: USUARIO_LOGADO_MOCK,
+      conteudo: (body as { conteudo: string }).conteudo,
+      criadoEm: new Date().toISOString(),
+    };
+    MENSAGENS_MOCK.push(nova);
+    return resolverComAtraso(clonar(nova));
+  }
+  return null;
+}
+
 export function mockFetch<TResposta>(caminho: string, { method, body }: MockOptions): Promise<TResposta> {
   const [caminhoBase, queryString] = caminho.split('?');
   const parametros = new URLSearchParams(queryString ?? '');
@@ -488,6 +654,14 @@ export function mockFetch<TResposta>(caminho: string, { method, body }: MockOpti
 
   if (method === 'GET' && caminhoBase === '/habilidades') {
     return mockListarHabilidades(parametros) as unknown as Promise<TResposta>;
+  }
+
+  const respostaChat = mockChat(method, caminhoBase, body);
+  if (respostaChat) return respostaChat as Promise<TResposta>;
+
+  if (caminhoBase.startsWith('/convites')) {
+    const resposta = mockConvites(method, caminhoBase, parametros, body);
+    if (resposta) return resposta as Promise<TResposta>;
   }
 
   // Perfil de outro usuário: GET /usuarios/usuario-mock-N (mas não /usuarios/me)
@@ -605,6 +779,15 @@ export function mockFetch<TResposta>(caminho: string, { method, body }: MockOpti
       return resolverComAtraso(paginar(meus.map(paraResumo)) as unknown as TResposta);
     }
 
+    case 'GET /projetos/vinculados': {
+      const status = parametros.get('status');
+      const vinculados = PROJETOS_MOCK.filter((p) =>
+        (p.criador?.id === USUARIO_LOGADO_MOCK.id || membrosDoProjetoMock(p).some((m) => m.usuario?.id === USUARIO_LOGADO_MOCK.id))
+        && (!status || p.status === status),
+      );
+      return resolverComAtraso(paginar(vinculados.map(paraResumo)) as unknown as TResposta);
+    }
+
     case 'GET /projetos/participando': {
       const participando = PROJETOS_MOCK.filter((p) =>
         membrosDoProjetoMock(p).some((m) => m.usuario?.id === USUARIO_LOGADO_MOCK.id && p.criador?.id !== USUARIO_LOGADO_MOCK.id),
@@ -700,7 +883,33 @@ export function mockFetch<TResposta>(caminho: string, { method, body }: MockOpti
         return resolverComAtraso(clonar(membrosDoProjetoMock(projeto)) as unknown as TResposta);
       }
 
-      const matchProjeto = method === 'GET' && caminhoBase.match(/^\/projetos\/([^/]+)$/);
+      // Expulsão/saída: remove o vínculo, libera a vaga e apaga a candidatura
+      // aceita (mesmas regras do ProjetoMembroService.remover).
+      const matchRemoverMembro = method === 'DELETE' && caminhoBase.match(/^\/projetos\/([^/]+)\/membros\/([^/]+)$/);
+      if (matchRemoverMembro) {
+        const projeto = PROJETOS_MOCK.find((p) => p.id === matchRemoverMembro[1]);
+        const membrosDoProjeto = projeto
+          ? MEMBROS_MOCK[projeto.id] ?? (MEMBROS_MOCK[projeto.id] = membrosDoProjetoMock(projeto))
+          : [];
+        const indice = membrosDoProjeto.findIndex((m) => m.id === matchRemoverMembro[2]);
+        if (!projeto || indice < 0) {
+          return rejeitarComAtraso(new ApiError(404, 'Membro não encontrado com o ID informado.'));
+        }
+        if (projeto.status === 'CONCLUIDO' || projeto.status === 'CANCELADO') {
+          return rejeitarComAtraso(new ApiError(400, 'Não é possível alterar a equipe de um projeto encerrado.'));
+        }
+        const [removido] = membrosDoProjeto.splice(indice, 1);
+        const indiceCandidatura = CANDIDATURAS_MOCK.findIndex(
+          (c) => c.projeto.id === projeto.id && c.usuario?.id === removido.usuario?.id,
+        );
+        if (indiceCandidatura >= 0) CANDIDATURAS_MOCK.splice(indiceCandidatura, 1);
+        projeto.vagasPreenchidas = Math.max(0, projeto.vagasPreenchidas - 1);
+        projeto.vagasDisponiveis = Math.max(0, projeto.vagas - projeto.vagasPreenchidas);
+        projeto.totalMembros = Math.max(0, projeto.totalMembros - 1);
+        return resolverComAtraso({ sucesso: true, mensagem: 'Membro removido do projeto com sucesso.' } as unknown as TResposta);
+      }
+
+      const matchProjeto =method === 'GET' && caminhoBase.match(/^\/projetos\/([^/]+)$/);
       if (matchProjeto) {
         const projeto = PROJETOS_MOCK.find((p) => p.id === matchProjeto[1]);
         if (!projeto) {
