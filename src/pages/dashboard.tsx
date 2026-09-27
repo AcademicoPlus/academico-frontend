@@ -294,7 +294,7 @@ export default function Dashboard() {
         <div className="flex flex-col gap-6">
           
           {/* Card de Perfil Resumido */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden flex flex-col">
+          <div className="hidden md:flex bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden flex-col">
             <div className="h-24 bg-gradient-to-r from-blue-500 via-indigo-500 to-[#183E6C] relative"></div>
             
             <div className="px-5 pb-5 relative flex flex-col items-center text-center">

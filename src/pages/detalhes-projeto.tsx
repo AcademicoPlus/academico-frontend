@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ApiError } from '../services/apiClient'
 import { buscarProjetoPorId, enviarBannerDoProjeto, removerBannerDoProjeto, type ProjetoDetalhe } from '../services/projetoService'
 import { listarMembrosDoProjeto, removerMembroDoProjeto, type ProjetoMembro } from '../services/projetoMembroService'
@@ -60,6 +60,7 @@ type AcaoConfirmavel =
   | { tipo: 'removerBanner' };
 
 function DetalhesProjeto({ id }: { id: string }) {
+  const navigate = useNavigate();
   const [projeto, setProjeto] = useState<ProjetoDetalhe | null>(null);
   const [membros, setMembros] = useState<ProjetoMembro[]>([]);
   const [meuId, setMeuId] = useState<string | null>(null);
@@ -391,10 +392,28 @@ function DetalhesProjeto({ id }: { id: string }) {
 
   return (
     <div className="max-w-5xl mx-auto pb-12 animate-fade-in">
-      <Link to="/projetos" className="inline-flex items-center gap-2 mb-8 text-gray-500 dark:text-gray-400 hover:text-[#F27405] text-sm font-bold transition-colors">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        Voltar para explorar
-      </Link>
+
+      {/* Botão de Voltar */}
+      <div className='mb-6'>
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-purple-400 transition-colors group cursor-pointer"
+        >
+          <span className="h-7 w-7 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center shadow-2xs group-hover:border-primary/40 transition-colors">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </span>
+          <span>Voltar</span>
+        </button>
+      </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-slate-700 overflow-hidden mb-8">
 

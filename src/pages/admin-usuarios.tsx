@@ -7,8 +7,10 @@ import { listarNiveisDeAcesso, type NivelAcesso } from '../services/nivelAcessoS
 import type { UsuarioResumo } from '../services/authService'
 import { ApiError } from '../services/apiClient'
 import { useMeuPerfil } from '../hooks/useMeuPerfil'
+import { useNavigate } from 'react-router-dom'
 
 export default function AdminUsuarios() {
+  const navigate = useNavigate();
   const { data: meuPerfil } = useMeuPerfil();
   const meuId = meuPerfil?.id ?? null;
   const [usuarios, setUsuarios] = useState<UsuarioResumo[]>([]);
@@ -84,6 +86,28 @@ export default function AdminUsuarios() {
 
   return (
     <div className="pb-12 max-w-7xl mx-auto">
+
+      {/* Botão de Voltar */}
+      <div className='mb-4'>
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-purple-400 transition-colors group cursor-pointer"
+        >
+          <span className="h-7 w-7 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center shadow-2xs group-hover:border-primary/40 transition-colors">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </span>
+          <span>Voltar</span>
+        </button>
+      </div>
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-[#183E6C] dark:text-blue-300 tracking-tight">Usuários</h1>

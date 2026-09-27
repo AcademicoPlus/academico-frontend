@@ -342,7 +342,7 @@ export default function Perfil() {
     <div className="mx-auto max-w-4xl flex flex-col gap-6 pb-16">
 
       {/* Botão de Voltar */}
-      <div>
+      <div >
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-purple-400 transition-colors group cursor-pointer"
