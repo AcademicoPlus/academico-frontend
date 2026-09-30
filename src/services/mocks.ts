@@ -23,6 +23,7 @@ import type { Candidatura } from './candidaturaService';
 import type { Convite } from './conviteService';
 import type { Conversa, MensagemProjeto } from './chatService';
 import type { PaginaResposta } from './apiClient';
+import type { Avaliacao } from './avaliacaoService';
 
 // Latência artificial pra tela de fato passar pelo estado de "carregando".
 const ATRASO_MS = 500;
@@ -349,6 +350,42 @@ const MEMBROS_MOCK: Record<string, ProjetoMembro[]> = {
     { id: 'membro-mock-6', projeto: null, usuario: USUARIO_LOGADO_MOCK, funcao: 'Designer', dataAdesao: '2024-03-14T10:00:00Z' },
   ],
 };
+
+const AVALIACOES_MOCK: Avaliacao[] = [
+  {
+    id: 'aval-mock-1',
+    projeto: { id: 'projeto-seed-1', titulo: 'App de Saúde Mental para Universitários', status: 'CONCLUIDO' },
+    avaliador: LUCAS_MENDES_MOCK,
+    nota: 5,
+    comentario: 'Trabalhar em equipe foi uma experiência fantástica. Demonstrou liderança técnica com extrema atenção aos prazos e excelente colaboração nas revisões de código.',
+    criadoEm: '2024-03-01T14:30:00Z',
+  },
+  {
+    id: 'aval-mock-2',
+    projeto: { id: 'projeto-seed-3', titulo: 'Plataforma de E-commerce Sustentável', status: 'CONCLUIDO' },
+    avaliador: MARIA_COSTA_MOCK,
+    nota: 5,
+    comentario: 'Excelente domínio de Design Systems e prototipagem. Organizou o fluxo de trabalho de forma clara e simplificou a visualização para membros de outras áreas.',
+    criadoEm: '2024-02-15T11:00:00Z',
+  },
+  {
+    id: 'aval-mock-3',
+    projeto: { id: 'projeto-seed-2', titulo: 'Sistema Inteligente de Proteção Web', status: 'CONCLUIDO' },
+    avaliador: {
+      id: 'usuario-mock-4',
+      nome: 'Rodrigo Farias',
+      curso: 'Engenharia de Software',
+      fotoUrl: null,
+      permission: 'ALUNO',
+      periodo: 7,
+      notaMedia: 4.7,
+      totalAvaliacoes: 3,
+    },
+    nota: 4,
+    comentario: 'Ótima capacidade analítica e integração rápida com o time. Muito proativo para resolver impedimentos e sempre aberto a receber e aplicar feedback construtivo.',
+    criadoEm: '2024-01-28T09:15:00Z',
+  },
+];
 
 function membrosDoProjetoMock(projeto: ProjetoDetalhe): ProjetoMembro[] {
   return (
@@ -909,7 +946,7 @@ export function mockFetch<TResposta>(caminho: string, { method, body }: MockOpti
         return resolverComAtraso({ sucesso: true, mensagem: 'Membro removido do projeto com sucesso.' } as unknown as TResposta);
       }
 
-      const matchProjeto =method === 'GET' && caminhoBase.match(/^\/projetos\/([^/]+)$/);
+      const matchProjeto = method === 'GET' && caminhoBase.match(/^\/projetos\/([^/]+)$/);
       if (matchProjeto) {
         const projeto = PROJETOS_MOCK.find((p) => p.id === matchProjeto[1]);
         if (!projeto) {
@@ -1161,6 +1198,11 @@ export function mockFetch<TResposta>(caminho: string, { method, body }: MockOpti
         const indice = DENUNCIAS_MOCK.indexOf(denuncia);
         DENUNCIAS_MOCK.splice(indice, 1);
         return resolverComAtraso(clonar(denuncia) as unknown as TResposta);
+      }
+
+      const matchAvaliacoesDoUsuario = method === 'GET' && caminhoBase.match(/^\/usuarios\/([^/]+)\/avaliacoes$/);
+      if (matchAvaliacoesDoUsuario) {
+        return resolverComAtraso(paginar(clonar(AVALIACOES_MOCK)) as unknown as TResposta);
       }
 
       return rejeitarComAtraso(

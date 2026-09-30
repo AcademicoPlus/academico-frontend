@@ -61,102 +61,53 @@ function formatarIniciais(nome: string): string {
     .join('');
 }
 
-/**
- * Badges de habilidade coloridos por categoria de acordo com o design system:
- * - Design / UI / UX / Criativo: Roxo / Violeta (primary)
- * - Tecnologia / Código / Frontend / Backend / Dados: Verde / Teal
- * - Marketing / Negócios / Gestão: Coral / Rose
- * - Fallbacks cicláveis: Âmbar, Índigo, Sky, Esmeralda
- */
-function obterEstiloHabilidade(nomeHabilidade: string): { badge: string; select: string; remove: string } {
-  const norm = nomeHabilidade.toLowerCase().trim();
 
-  // Design / UI / UX / Criação
-  if (
-    norm.includes('ui') ||
-    norm.includes('ux') ||
-    norm.includes('design') ||
-    norm.includes('figma') ||
-    norm.includes('cria') ||
-    norm.includes('prototip')
-  ) {
-    return {
-      badge: 'bg-purple-50 text-primary border-purple-200/80 dark:bg-primary/15 dark:text-purple-300 dark:border-primary/30',
-      select: 'bg-white/90 dark:bg-slate-900/90 text-primary dark:text-purple-300 border-purple-200 dark:border-purple-800/80',
-      remove: 'text-primary hover:text-purple-800 dark:hover:text-purple-200 hover:bg-purple-100 dark:hover:bg-purple-900/60',
-    };
+function renderIconeHabilidade(nome: string) {
+  const norm = nome.toLowerCase().trim();
+  if (norm.includes('react')) {
+    return (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <circle cx="12" cy="12" r="2" />
+        <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(0 12 12)" />
+        <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(60 12 12)" />
+        <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(120 12 12)" />
+      </svg>
+    );
   }
-
-  // Tecnologia / Desenvolvimento / Programação / Dados
-  if (
-    norm.includes('react') ||
-    norm.includes('tech') ||
-    norm.includes('dev') ||
-    norm.includes('js') ||
-    norm.includes('ts') ||
-    norm.includes('code') ||
-    norm.includes('program') ||
-    norm.includes('python') ||
-    norm.includes('java') ||
-    norm.includes('node') ||
-    norm.includes('sql') ||
-    norm.includes('html') ||
-    norm.includes('css') ||
-    norm.includes('git') ||
-    norm.includes('front') ||
-    norm.includes('back')
-  ) {
-    return {
-      badge: 'bg-teal-50 text-teal-700 border-teal-200/80 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-800/60',
-      select: 'bg-white/90 dark:bg-slate-900/90 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800/80',
-      remove: 'text-teal-500 hover:text-teal-800 dark:hover:text-teal-200 hover:bg-teal-100 dark:hover:bg-teal-900/60',
-    };
+  if (norm.includes('design') || norm.includes('ui') || norm.includes('ux') || norm.includes('figma')) {
+    return (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+      </svg>
+    );
   }
-
-  // Marketing / Comunicação / Negócios / Gestão
-  if (
-    norm.includes('market') ||
-    norm.includes('seo') ||
-    norm.includes('gest') ||
-    norm.includes('produt') ||
-    norm.includes('comunic') ||
-    norm.includes('venda') ||
-    norm.includes('lead')
-  ) {
-    return {
-      badge: 'bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60',
-      select: 'bg-white/90 dark:bg-slate-900/90 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/80',
-      remove: 'text-rose-500 hover:text-rose-800 dark:hover:text-rose-200 hover:bg-rose-100 dark:hover:bg-rose-900/60',
-    };
+  if (norm.includes('css') || norm.includes('tailwind')) {
+    return (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+      </svg>
+    );
   }
-
-  // Fallbacks determinísticos por hash
-  const paletas = [
-    {
-      badge: 'bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60',
-      select: 'bg-white/90 dark:bg-slate-900/90 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/80',
-      remove: 'text-amber-500 hover:text-amber-800 dark:hover:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/60',
-    },
-    {
-      badge: 'bg-indigo-50 text-indigo-700 border-indigo-200/80 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800/60',
-      select: 'bg-white/90 dark:bg-slate-900/90 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/80',
-      remove: 'text-indigo-500 hover:text-indigo-800 dark:hover:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-900/60',
-    },
-    {
-      badge: 'bg-sky-50 text-sky-700 border-sky-200/80 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/60',
-      select: 'bg-white/90 dark:bg-slate-900/90 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800/80',
-      remove: 'text-sky-500 hover:text-sky-800 dark:hover:text-sky-200 hover:bg-sky-100 dark:hover:bg-sky-900/60',
-    },
-    {
-      badge: 'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60',
-      select: 'bg-white/90 dark:bg-slate-900/90 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/80',
-      remove: 'text-emerald-500 hover:text-emerald-800 dark:hover:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-900/60',
-    },
-  ];
-
-  let h = 0;
-  for (let i = 0; i < nomeHabilidade.length; i++) h = (h * 31 + nomeHabilidade.charCodeAt(i)) >>> 0;
-  return paletas[h % paletas.length];
+  if (norm.includes('fastapi') || norm.includes('api')) {
+    return (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    );
+  }
+  if (norm.includes('python')) {
+    return (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 10h.01M15 14h.01" />
+      </svg>
+    );
+  }
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+    </svg>
+  );
 }
 
 // ─── Componente Local de Input (Variante de tela com o design system primary) ─
@@ -171,6 +122,7 @@ interface LocalInputProps {
   required?: boolean;
   hint?: string;
   icon?: ReactNode;
+  autoComplete?: string;
 }
 
 function LocalInput({
@@ -183,8 +135,12 @@ function LocalInput({
   required = false,
   hint,
   icon,
+  autoComplete,
 }: LocalInputProps) {
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const isTextarea = type === 'textarea';
+  const isPassword = type === 'password';
+  const inputType = isPassword ? (mostrarSenha ? 'text' : 'password') : type;
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -223,16 +179,37 @@ function LocalInput({
           />
         ) : (
           <input
-            type={type}
+            type={inputType}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             required={required}
             aria-invalid={!!error}
+            autoComplete={autoComplete}
             className={`w-full rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-transparent outline-none ${
               icon ? 'pl-10' : ''
-            }`}
+            } ${isPassword ? 'pr-11' : ''}`}
           />
+        )}
+
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setMostrarSenha((v) => !v)}
+            aria-label={mostrarSenha ? 'Ocultar senha' : 'Ver senha'}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1 cursor-pointer"
+          >
+            {mostrarSenha ? (
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+              </svg>
+            ) : (
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            )}
+          </button>
         )}
       </div>
 
@@ -301,7 +278,7 @@ export default function EditarPerfil() {
   const [sucessoSenha, setSucessoSenha] = useState(false);
 
   // ── Zona de risco: excluir conta ───────────────────────────────────────────
-  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const [confirmouExclusaoCheckbox, setConfirmouExclusaoCheckbox] = useState(false);
   const [senhaExclusao, setSenhaExclusao] = useState('');
   const [excluindoConta, setExcluindoConta] = useState(false);
   const [erroExclusao, setErroExclusao] = useState<string | null>(null);
@@ -702,56 +679,6 @@ export default function EditarPerfil() {
         </div>
       </section>
 
-      {/* Mini Estatísticas Resumidas (Inspirado no painel da comunidade) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)] flex items-center gap-3.5">
-          <div className="h-10 w-10 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-primary dark:text-purple-400 flex items-center justify-center shrink-0 border border-purple-100 dark:border-purple-900/40">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-          </div>
-          <div>
-            <span className="text-xl font-extrabold text-gray-900 dark:text-gray-100 leading-none block">
-              {habilidades.length}
-            </span>
-            <span className="text-xs font-medium text-gray-400 dark:text-gray-500 mt-1 block">
-              Habilidades ativas
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)] flex items-center gap-3.5">
-          <div className="h-10 w-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-primary dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-900/40">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a10.99 10.99 0 00-.25 2.572c0 2.87 1.944 5.343 4.7 5.86v1.517h-1.5a1 1 0 100 2h4.5a1 1 0 100-2h-1.5V16.48c2.756-.517 4.7-2.99 4.7-5.86 0-.895-.088-1.76-.25-2.572l2.644-1.133a1 1 0 000-1.84l-7-3z" />
-            </svg>
-          </div>
-          <div>
-            <span className="text-xl font-extrabold text-gray-900 dark:text-gray-100 leading-none block">
-              {periodo ? `${periodo}º sem` : '—'}
-            </span>
-            <span className="text-xs font-medium text-gray-400 dark:text-gray-500 mt-1 block">
-              Período acadêmico
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)] flex items-center gap-3.5">
-          <div className="h-10 w-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-900/40">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <div>
-            <span className="text-xl font-extrabold text-gray-900 dark:text-gray-100 leading-none block">
-              {(linkedin ? 1 : 0) + (github ? 1 : 0)}/2
-            </span>
-            <span className="text-xs font-medium text-gray-400 dark:text-gray-500 mt-1 block">
-              Redes conectadas
-            </span>
-          </div>
-        </div>
-      </div>
 
       {/* Feedback global de erro ou sucesso */}
       {erroGeral && (
@@ -921,52 +848,84 @@ export default function EditarPerfil() {
           </div>
           <div>
             <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Habilidades e Conhecimentos</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Adicione suas tecnologias e defina seu nível de proficiência</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Adicione e gerencie suas tecnologias dominadas e níveis de proficiência</p>
           </div>
         </div>
 
         {/* Seção de busca e seleção de habilidades */}
-        <div className="flex flex-col gap-3">
-          {/* Campo de busca + seletor de nível para a próxima habilidade a adicionar */}
+        <div className="flex flex-col gap-4">
+          {/* Barra de Adicionar: Campo de busca + seletor de nível + botão "+ Adicionar" */}
           <div className="relative" ref={dropdownRef}>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-              <div className="relative flex items-center flex-1 rounded-xl border border-gray-200/90 dark:border-slate-700/80 bg-gray-50/60 dark:bg-slate-800/60 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all">
-                <div className="pl-3.5 text-gray-400 dark:text-gray-500 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+              {/* Campo de busca com estado isolado buscaHabilidade e proteção contra autofill de credenciais */}
+              <div className="flex-1 flex flex-col gap-1.5">
+                <label htmlFor="busca-habilidade" className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                  Adicionar competência
+                </label>
+                <div className="relative flex items-center rounded-xl border border-gray-200/90 dark:border-slate-700/80 bg-gray-50/60 dark:bg-slate-800/60 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all">
+                  <div className="pl-3.5 text-gray-400 dark:text-gray-500 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <input
+                    id="busca-habilidade"
+                    name="termo-busca-habilidade"
+                    type="search"
+                    autoComplete="off"
+                    data-lpignore="true"
+                    data-1p-ignore="true"
+                    data-form-type="other"
+                    value={buscaHabilidade}
+                    onChange={(e) => handleBuscaHabilidadeChange(e.target.value)}
+                    placeholder="Adicionar habilidade..."
+                    className="w-full bg-transparent px-3 py-2.5 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
+                  />
                 </div>
-                <input
-                  type="text"
-                  value={buscaHabilidade}
-                  onChange={(e) => handleBuscaHabilidadeChange(e.target.value)}
-                  placeholder="Adicionar habilidade..."
-                  className="w-full bg-transparent px-3 py-2.5 pr-10 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none"
-                />
-                <span className="absolute right-3.5 text-primary font-bold text-lg pointer-events-none select-none">
-                  +
-                </span>
               </div>
 
-              <div className="relative rounded-xl border border-gray-200/90 dark:border-slate-700/80 bg-gray-50/60 dark:bg-slate-800/60 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all shrink-0">
-                <select
-                  value={nivelParaAdicionar}
-                  onChange={(e) => setNivelParaAdicionar(e.target.value as NivelHabilidade)}
-                  title="Nível de experiência da habilidade a adicionar"
-                  className="rounded-xl bg-transparent px-3.5 py-2.5 pr-8 text-sm font-medium text-gray-700 dark:text-gray-200 outline-none cursor-pointer appearance-none"
-                >
-                  {NIVEIS_HABILIDADE.map((n) => (
-                    <option key={n.valor} value={n.valor} className="bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100">
-                      {n.label}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 dark:text-gray-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+              {/* Seletor de nível */}
+              <div className="sm:w-44 flex flex-col gap-1.5 shrink-0">
+                <label htmlFor="nivel-habilidade-select" className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                  Nível
+                </label>
+                <div className="relative rounded-xl border border-gray-200/90 dark:border-slate-700/80 bg-gray-50/60 dark:bg-slate-800/60 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all">
+                  <select
+                    id="nivel-habilidade-select"
+                    value={nivelParaAdicionar}
+                    onChange={(e) => setNivelParaAdicionar(e.target.value as NivelHabilidade)}
+                    title="Nível de experiência da habilidade a adicionar"
+                    className="w-full rounded-xl bg-transparent px-3.5 py-2.5 pr-8 text-sm font-medium text-gray-700 dark:text-gray-200 outline-none cursor-pointer appearance-none"
+                  >
+                    {NIVEIS_HABILIDADE.map((n) => (
+                      <option key={n.valor} value={n.valor} className="bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100">
+                        {n.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 dark:text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
                 </div>
               </div>
+
+              {/* Botão + Adicionar */}
+              <button
+                type="button"
+                onClick={() => {
+                  const match = sugestoes.find((s) => s.nome.toLowerCase() === buscaHabilidade.trim().toLowerCase()) || sugestoes[0];
+                  if (match) {
+                    handleAdicionar(match);
+                  }
+                }}
+                disabled={adicionando || (!buscaHabilidade.trim() && sugestoes.length === 0)}
+                className="h-[42px] px-5 rounded-xl text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-primary dark:hover:bg-primary/90 transition-all flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50 cursor-pointer shrink-0"
+              >
+                <span className="text-base leading-none font-bold">+</span>
+                <span>Adicionar</span>
+              </button>
             </div>
 
             {/* Dropdown de sugestões */}
@@ -997,58 +956,69 @@ export default function EditarPerfil() {
             )}
           </div>
 
-          {/* Badges das habilidades atuais com categoria por cor e seletor de nível inline */}
+          {/* Lista de habilidades: cada habilidade alinhada em linha própria com espaçamento consistente */}
           {habilidades.length > 0 ? (
-            <div className="flex flex-wrap gap-2.5 pt-2">
+            <div className="flex flex-col gap-2.5 pt-1">
               {habilidades.map((h) => {
                 const estaRemovendo = removendo === h.id;
                 const estaAtualizandoNivel = atualizandoNivel === h.id;
-                const estilo = obterEstiloHabilidade(h.habilidade.nome);
 
                 return (
-                  <span
+                  <div
                     key={h.id}
-                    className={`inline-flex items-center gap-2 rounded-full pl-3.5 pr-1.5 py-1.5 text-xs font-medium border shadow-2xs transition-all ${estilo.badge}`}
+                    className="flex items-center justify-between px-4 py-3 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
                   >
-                    <span className="font-semibold">{h.habilidade.nome}</span>
-
-                    <div className="relative inline-flex items-center">
-                      <select
-                        value={h.nivel}
-                        onChange={(e) => handleAlterarNivel(h, e.target.value as NivelHabilidade)}
-                        disabled={estaAtualizandoNivel || estaRemovendo}
-                        aria-label={`Nível de experiência em ${h.habilidade.nome}`}
-                        className={`rounded-full border text-[11px] font-semibold pl-2 pr-4 py-0.5 outline-none cursor-pointer appearance-none transition-all disabled:opacity-50 ${estilo.select}`}
-                      >
-                        {NIVEIS_HABILIDADE.map((n) => (
-                          <option key={n.valor} value={n.valor} className="bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100">
-                            {n.label}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="absolute right-1.5 pointer-events-none text-[8px] opacity-70">▼</span>
+                    {/* Nome e Ícone da habilidade */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 shrink-0">
+                        {renderIconeHabilidade(h.habilidade.nome)}
+                      </span>
+                      <span className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
+                        {h.habilidade.nome}
+                      </span>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => handleRemover(h)}
-                      disabled={estaRemovendo || adicionando}
-                      aria-label={`Remover ${h.habilidade.nome}`}
-                      className={`rounded-full p-1 transition-colors disabled:opacity-40 cursor-pointer ${estilo.remove}`}
-                    >
-                      {estaRemovendo ? (
-                        <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                        </svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" clipRule="evenodd"
-                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
-                        </svg>
-                      )}
-                    </button>
-                  </span>
+                    {/* Seletor de Nível e Botão de Remover */}
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      <div className="relative">
+                        <select
+                          value={h.nivel}
+                          onChange={(e) => handleAlterarNivel(h, e.target.value as NivelHabilidade)}
+                          disabled={estaAtualizandoNivel || estaRemovendo}
+                          aria-label={`Nível de experiência em ${h.habilidade.nome}`}
+                          className="rounded-lg border border-gray-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 pr-7 text-xs font-medium text-gray-700 dark:text-gray-200 outline-none cursor-pointer appearance-none hover:border-gray-300 dark:hover:border-slate-600 focus:border-primary transition-colors disabled:opacity-50"
+                        >
+                          {NIVEIS_HABILIDADE.map((n) => (
+                            <option key={n.valor} value={n.valor} className="bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100">
+                              {n.label}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemover(h)}
+                        disabled={estaRemovendo || estaAtualizandoNivel}
+                        title={`Remover ${h.habilidade.nome}`}
+                        aria-label={`Remover ${h.habilidade.nome}`}
+                        className="h-7 w-7 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors flex items-center justify-center cursor-pointer disabled:opacity-50"
+                      >
+                        {estaRemovendo ? (
+                          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-red-500 border-t-transparent" />
+                        ) : (
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -1062,35 +1032,6 @@ export default function EditarPerfil() {
         </div>
 
       </section>
-
-      {/* ── Botões de Ação Principais ────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onClick={() => navigate(`/usuarios/${id}`)}
-          className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-900 border border-gray-200/90 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all shadow-2xs cursor-pointer"
-        >
-          Cancelar
-        </button>
-
-        <button
-          type="button"
-          onClick={handleSalvar}
-          disabled={salvando}
-          className="w-full sm:w-auto px-8 py-2.5 rounded-xl text-sm font-semibold text-white bg-primary hover:bg-[#4E3FE4] shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-        >
-          {salvando ? (
-            'Salvando…'
-          ) : (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-              </svg>
-              Salvar alterações
-            </>
-          )}
-        </button>
-      </div>
 
       {/* ── Bloco 3: Segurança & Trocar Senha ───────────────────────────────── */}
       <section className="bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)] p-4 sm:p-6 md:p-8 flex flex-col gap-6">
@@ -1124,61 +1065,81 @@ export default function EditarPerfil() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <LocalInput
-            label="Senha atual"
-            type="password"
-            value={senhaAtual}
-            onChange={setSenhaAtual}
-            placeholder="••••••••"
-          />
-          <div className="hidden sm:block" />
-          <LocalInput
-            label="Nova senha"
-            type="password"
-            value={novaSenha}
-            onChange={setNovaSenha}
-            placeholder="Mínimo 8 caracteres"
-          />
-          <LocalInput
-            label="Confirmar nova senha"
-            type="password"
-            value={confirmarNovaSenha}
-            onChange={setConfirmarNovaSenha}
-            placeholder="Repita a nova senha"
-          />
-        </div>
+        <form
+          autoComplete="off"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleAlterarSenha();
+          }}
+          className="flex flex-col gap-6"
+        >
 
-        <div className="flex justify-end pt-1">
-          <button
-            type="button"
-            onClick={handleAlterarSenha}
-            disabled={alterandoSenha}
-            className="px-6 py-2.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-900 border border-gray-200/90 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer shadow-2xs"
-          >
-            {alterandoSenha ? 'Alterando senha…' : 'Alterar senha'}
-          </button>
-        </div>
+
+          <div className="flex flex-col gap-4">
+            {/* Senha Atual em largura completa */}
+            <LocalInput
+              label="Senha atual"
+              type="password"
+              autoComplete="current-password"
+              value={senhaAtual}
+              onChange={setSenhaAtual}
+              placeholder="Digite sua senha atual"
+            />
+
+            {/* Grid com Nova Senha e Confirmação alinhadas */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <LocalInput
+                label="Nova senha"
+                type="password"
+                autoComplete="new-password"
+                value={novaSenha}
+                onChange={setNovaSenha}
+                placeholder="Mínimo 8 caracteres"
+                hint="• Mínimo 8 caracteres • Letra e número"
+              />
+              <LocalInput
+                label="Confirmar nova senha"
+                type="password"
+                autoComplete="new-password"
+                value={confirmarNovaSenha}
+                onChange={setConfirmarNovaSenha}
+                placeholder="Repita a nova senha"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-1">
+            <button
+              type="submit"
+              disabled={alterandoSenha}
+              className="px-6 py-2.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-900 border border-gray-200/90 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer shadow-2xs"
+            >
+              {alterandoSenha ? 'Alterando senha…' : 'Alterar senha'}
+            </button>
+          </div>
+        </form>
       </section>
 
       {/* ── Bloco 4: Zona de Risco (Excluir Conta) ───────────────────────────── */}
-      <section className="bg-white dark:bg-slate-900/90 rounded-2xl border border-red-200/70 dark:border-red-900/40 shadow-[0_4px_20px_-4px_rgba(239,68,68,0.05)] p-4 sm:p-6 md:p-8 flex flex-col gap-5">
-        <div className="flex items-start gap-4">
-          <div className="h-10 w-10 rounded-xl bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0 border border-red-100 dark:border-red-900/50">
+      <section className="bg-red-50/40 dark:bg-red-950/20 rounded-2xl border border-red-200/80 dark:border-red-900/50 shadow-[0_4px_20px_-4px_rgba(239,68,68,0.05)] p-4 sm:p-6 md:p-8 flex flex-col gap-6">
+        <div className="flex items-start gap-3.5 pb-1">
+          <div className="h-9 w-9 rounded-xl bg-red-100/80 dark:bg-red-900/50 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0 border border-red-200/60 dark:border-red-800/50">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
           </div>
           <div className="flex-1">
-            <h2 className="text-base font-bold text-red-700 dark:text-red-400">Excluir conta</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              Essa ação desativa sua conta permanentemente. Não é possível desfazer.
+            <h2 className="text-base font-bold text-red-700 dark:text-red-400">
+              Zona de Perigo — Excluir Conta
+            </h2>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+              Ao excluir sua conta, todas as suas candidaturas ativas, histórico de colaboração e dados de perfil serão permanentemente desativados. Esta ação não pode ser desfeita.
             </p>
           </div>
         </div>
 
         {erroExclusao && (
-          <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/40 dark:border-red-900/50 dark:text-red-400 flex items-center gap-2">
+          <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/40 dark:border-red-900/50 dark:text-red-400 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
@@ -1186,49 +1147,78 @@ export default function EditarPerfil() {
           </div>
         )}
 
-        {!confirmandoExclusao ? (
-          <div className="flex justify-end pt-1">
+        <div className="bg-white dark:bg-slate-900/90 rounded-xl border border-red-100 dark:border-red-950/60 p-5 flex flex-col gap-4 shadow-2xs">
+          <LocalInput
+            label="Digite sua senha atual para autorizar"
+            type="password"
+            autoComplete="current-password"
+            value={senhaExclusao}
+            onChange={setSenhaExclusao}
+            placeholder="Sua senha de acesso"
+          />
+
+          <label className="flex items-start gap-3 cursor-pointer select-none pt-1">
+            <input
+              type="checkbox"
+              checked={confirmouExclusaoCheckbox}
+              onChange={(e) => setConfirmouExclusaoCheckbox(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500 cursor-pointer"
+            />
+            <span className="text-xs text-gray-600 dark:text-gray-300 leading-normal">
+              Confirmo que desejo excluir permanentemente minha conta institucional e compreendo que meus dados não poderão ser restaurados.
+            </span>
+          </label>
+
+          <div className="pt-1">
             <button
               type="button"
-              onClick={() => setConfirmandoExclusao(true)}
-              className="px-5 py-2.5 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 dark:hover:text-white transition-all shadow-2xs cursor-pointer"
+              onClick={handleExcluirConta}
+              disabled={excluindoConta || !confirmouExclusaoCheckbox || !senhaExclusao.trim()}
+              className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-red-500 hover:bg-red-600 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer w-fit shadow-xs flex items-center gap-2"
             >
-              Excluir minha conta
+              {excluindoConta ? 'Excluindo conta…' : 'Excluir minha conta permanentemente'}
             </button>
           </div>
-        ) : (
-          <div className="flex flex-col gap-4 rounded-2xl border border-red-200/90 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/30 p-5">
-            <p className="text-sm text-red-700 dark:text-red-400 font-medium">
-              Tem certeza? Digite sua senha para confirmar a exclusão da sua conta.
-            </p>
-            <LocalInput
-              label="Senha"
-              type="password"
-              value={senhaExclusao}
-              onChange={setSenhaExclusao}
-              placeholder="••••••••"
-            />
-            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-1">
-              <button
-                type="button"
-                onClick={() => { setConfirmandoExclusao(false); setSenhaExclusao(''); setErroExclusao(null); }}
-                disabled={excluindoConta}
-                className="px-5 py-2.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleExcluirConta}
-                disabled={excluindoConta}
-                className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
-              >
-                {excluindoConta ? 'Excluindo…' : 'Confirmar exclusão'}
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
       </section>
+
+      {/* ── Barra Inferior de Ação: Cancelar e Salvar ───────────────────────── */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-gray-100 dark:border-slate-800">
+        <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Alterações não salvas serão perdidas ao sair.</span>
+        </div>
+
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <button
+            type="button"
+            onClick={() => navigate(`/usuarios/${id}`)}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
+          >
+            Cancelar e voltar
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSalvar}
+            disabled={salvando}
+            className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-primary dark:hover:bg-primary/90 shadow-md shadow-slate-900/10 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+          >
+            {salvando ? (
+              'Salvando…'
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                </svg>
+                <span>Salvar alterações</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
 
       {confirmandoRemocaoFoto && (
         <ConfirmModal

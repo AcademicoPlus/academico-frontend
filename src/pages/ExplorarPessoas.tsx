@@ -303,8 +303,8 @@ export default function ExplorarPessoas() {
 
       {/* Grid */}
       {carregando ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch">
+          {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : usuarios.length === 0 ? (
         <EstadoVazio
@@ -314,14 +314,15 @@ export default function ExplorarPessoas() {
           className="py-16"
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch">
           {usuarios.map((u) => (
             <Card
               key={u.id}
               onClick={() => navigate(`/usuarios/${u.id}`)}
-              className="p-5 hover:border-primary/40 dark:hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-200 group flex flex-col justify-between"
+              className="p-5 hover:border-primary/40 dark:hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-200 group flex flex-col h-full"
             >
-              <div className="flex flex-col gap-3.5">
+              {/* Conteúdo principal — cresce para preencher a altura do card */}
+              <div className="flex flex-col gap-3.5 flex-1">
 
                 {/* Avatar circular + nome + curso */}
                 <div className="flex items-center gap-3.5">
@@ -346,37 +347,41 @@ export default function ExplorarPessoas() {
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
                       {u.curso ?? '—'}
                     </p>
+                    {/* Badge de professor — inline com nome/curso para não variar a altura do card */}
+                    {u.permission === 'PROFESSOR' && (
+                      <span className="mt-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-indigo-50 text-primary border border-primary/20 dark:bg-primary/15 dark:text-purple-300 dark:border-primary/30">
+                        Professor
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {/* Badge de professor */}
-                {u.permission === 'PROFESSOR' && (
-                  <div>
-                    <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-indigo-50 text-primary border border-primary/20 dark:bg-primary/15 dark:text-purple-300 dark:border-primary/30">
-                      Professor
-                    </span>
+                {/* Habilidades como pills coloridas por categoria */}
+                {(u.habilidades ?? []).length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {(u.habilidades ?? []).slice(0, 3).map((h) => (
+                      <span
+                        key={h.id}
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${obterEstiloHabilidade(h.nome)}`}
+                      >
+                        {h.nome}
+                      </span>
+                    ))}
+                    {(u.habilidades ?? []).length > 3 && (
+                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-gray-400 border border-gray-200/60 dark:border-slate-700">
+                        +{(u.habilidades ?? []).length - 3}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* Habilidades como pills coloridas por categoria */}
-              {(u.habilidades ?? []).length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-3">
-                  {(u.habilidades ?? []).slice(0, 3).map((h) => (
-                    <span
-                      key={h.id}
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${obterEstiloHabilidade(h.nome)}`}
-                    >
-                      {h.nome}
-                    </span>
-                  ))}
-                  {(u.habilidades ?? []).length > 3 && (
-                    <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-gray-400 border border-gray-200/60 dark:border-slate-700">
-                      +{(u.habilidades ?? []).length - 3}
-                    </span>
-                  )}
-                </div>
-              )}
+              {/* Link fixado no rodapé do card */}
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-xs font-semibold text-primary group-hover:underline">
+                  Ver perfil →
+                </span>
+              </div>
             </Card>
           ))}
         </div>

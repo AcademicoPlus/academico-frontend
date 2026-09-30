@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent, type SyntheticEvent } from 'react';
 import { ApiError } from '../services/apiClient';
 import {
   atualizarProjeto,
@@ -303,8 +303,11 @@ function EditarProjeto({ id }: { id: string }) {
     });
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleSubmit(event?: FormEvent<HTMLFormElement> | SyntheticEvent) {
+    event?.preventDefault();
+    if (projeto && (projeto.status === 'CONCLUIDO' || projeto.status === 'CANCELADO')) {
+      return;
+    }
     setErro(null);
     setSucesso(null);
 
@@ -551,7 +554,7 @@ function EditarProjeto({ id }: { id: string }) {
         )}
 
         <fieldset disabled={statusFinal} className="flex flex-col gap-5 disabled:opacity-50">
-          <form className="flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
+          <form id="form-editar-projeto" className="flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
             {/* Título do projeto */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
@@ -658,16 +661,6 @@ function EditarProjeto({ id }: { id: string }) {
                 )}
               </div>
             </div>
-
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                disabled={salvando}
-                className="w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-semibold text-white bg-primary hover:bg-primary/90 transition-all shadow-md shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-              >
-                {salvando ? 'Salvando...' : 'Salvar alterações'}
-              </button>
-            </div>
           </form>
         </fieldset>
       </section>
@@ -692,52 +685,6 @@ function EditarProjeto({ id }: { id: string }) {
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
             <span>{erroHabilidade}</span>
-          </div>
-        )}
-
-        {habilidadesSelecionadas.length > 0 && (
-          <div className="flex flex-col gap-2">
-            {habilidadesSelecionadas.map((vinculo) => (
-              <div
-                key={vinculo.id}
-                className={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border transition-all ${obterContainerHabilidade(vinculo.habilidade.nome)}`}
-              >
-                <div className="flex items-center gap-2 flex-wrap min-w-0">
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${obterEstiloHabilidade(vinculo.habilidade.nome)}`}>
-                    {vinculo.habilidade.nome}
-                  </span>
-                  {vinculo.habilidade.categoria && (
-                    <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider">
-                      {vinculo.habilidade.categoria}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-3.5 shrink-0">
-                  <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={vinculo.obrigatoria}
-                      disabled={habilidadeEmAcao === vinculo.habilidade.id}
-                      onChange={() => handleAlternarObrigatoria(vinculo.habilidade.id, vinculo.obrigatoria)}
-                      className="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-primary focus:ring-primary/20 accent-[#5B4CF5]"
-                    />
-                    Obrigatória
-                  </label>
-                  <button
-                    type="button"
-                    disabled={habilidadeEmAcao === vinculo.habilidade.id}
-                    onClick={() => handleRemoverHabilidade(vinculo.habilidade.id)}
-                    aria-label={`Remover ${vinculo.habilidade.nome}`}
-                    className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer disabled:opacity-40"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            ))}
           </div>
         )}
 
@@ -794,6 +741,53 @@ function EditarProjeto({ id }: { id: string }) {
             ))}
           </div>
         )}
+
+        {/* Lista de chips de habilidades já adicionadas */}
+        {habilidadesSelecionadas.length > 0 && (
+          <div className="flex flex-col gap-2">
+            {habilidadesSelecionadas.map((vinculo) => (
+              <div
+                key={vinculo.id}
+                className={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border transition-all ${obterContainerHabilidade(vinculo.habilidade.nome)}`}
+              >
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${obterEstiloHabilidade(vinculo.habilidade.nome)}`}>
+                    {vinculo.habilidade.nome}
+                  </span>
+                  {vinculo.habilidade.categoria && (
+                    <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider">
+                      {vinculo.habilidade.categoria}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3.5 shrink-0">
+                  <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={vinculo.obrigatoria}
+                      disabled={habilidadeEmAcao === vinculo.habilidade.id}
+                      onChange={() => handleAlternarObrigatoria(vinculo.habilidade.id, vinculo.obrigatoria)}
+                      className="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-primary focus:ring-primary/20 accent-[#5B4CF5]"
+                    />
+                    Obrigatória
+                  </label>
+                  <button
+                    type="button"
+                    disabled={habilidadeEmAcao === vinculo.habilidade.id}
+                    onClick={() => handleRemoverHabilidade(vinculo.habilidade.id)}
+                    aria-label={`Remover ${vinculo.habilidade.nome}`}
+                    className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer disabled:opacity-40"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Card 3: Status do Projeto */}
@@ -810,12 +804,6 @@ function EditarProjeto({ id }: { id: string }) {
           </div>
         </div>
 
-        <div>
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${statusBadgeDesign[projeto.status]}`}>
-            {STATUS_PROJETO_LABEL[projeto.status]}
-          </span>
-        </div>
-
         {erroStatus && (
           <div role="alert" className="rounded-xl border border-red-200/90 bg-red-50/90 dark:bg-red-950/40 dark:border-red-900/50 p-4 text-sm text-red-600 dark:text-red-400 flex items-center gap-2.5">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -825,74 +813,130 @@ function EditarProjeto({ id }: { id: string }) {
           </div>
         )}
 
-        {statusFinal ? (
-          <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500">
-            Projetos com status final não podem ter o status alterado.
-          </p>
-        ) : (
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap gap-2.5">
-              {transicoesDisponiveis(projeto.status)
-                .filter((status) => status !== 'CANCELADO')
-                .map((status) => (
+        {/* Grid 2×2 de cards de status */}
+        {(() => {
+          const disponiveis = new Set(transicoesDisponiveis(projeto.status));
+          const descricaoStatus: Record<StatusProjeto, string> = {
+            ABERTO: 'Recebendo novas candidaturas',
+            EM_ANDAMENTO: 'Em execução com os membros selecionados',
+            CONCLUIDO: 'Fase finalizada, libera avaliação de colegas',
+            CANCELADO: 'Iniciativa suspensa',
+          };
+          return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {TODOS_STATUS.map((status) => {
+                const eSelecionado = projeto.status === status;
+                const eDisponivel = disponiveis.has(status);
+                const desabilitado = !eSelecionado && (!eDisponivel || alterandoStatus || statusFinal);
+
+                return (
                   <button
                     key={status}
                     type="button"
-                    disabled={alterandoStatus}
-                    onClick={() => handleMudarStatus(status)}
-                    className="px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm border border-primary/40 text-primary dark:text-purple-300 hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
+                    disabled={desabilitado || eSelecionado}
+                    onClick={() => {
+                      if (status === 'CANCELADO') {
+                        setConfirmandoCancelamento(true);
+                      } else {
+                        handleMudarStatus(status);
+                      }
+                    }}
+                    className={[
+                      'flex items-start gap-3 p-4 rounded-xl border text-left transition-all',
+                      eSelecionado
+                        ? 'border-primary/40 bg-purple-50/60 dark:bg-primary/10 dark:border-primary/40 ring-2 ring-primary/20'
+                        : desabilitado
+                          ? 'border-gray-200/60 dark:border-slate-800 bg-gray-50/40 dark:bg-slate-800/20 opacity-40 cursor-not-allowed'
+                          : 'border-gray-200/80 dark:border-slate-700/60 bg-white dark:bg-slate-900 hover:border-primary/30 hover:bg-purple-50/30 dark:hover:bg-primary/5 cursor-pointer',
+                    ].join(' ')}
                   >
-                    Marcar como {STATUS_PROJETO_LABEL[status]}
-                  </button>
-                ))}
+                    {/* Indicador radio */}
+                    <span className={[
+                      'mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors',
+                      eSelecionado
+                        ? 'border-primary bg-primary'
+                        : 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900',
+                    ].join(' ')}>
+                      {eSelecionado && (
+                        <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                      )}
+                    </span>
 
-              {!confirmandoCancelamento && (
-                <button
-                  type="button"
-                  disabled={alterandoStatus}
-                  onClick={() => setConfirmandoCancelamento(true)}
-                  className="px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm border border-red-300 dark:border-red-900/60 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
-                >
-                  Cancelar projeto
-                </button>
-              )}
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-sm font-semibold ${
+                          eSelecionado ? 'text-primary dark:text-purple-300' : 'text-gray-800 dark:text-gray-100'
+                        }`}>
+                          {STATUS_PROJETO_LABEL[status]}
+                        </span>
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${statusBadgeDesign[status]}`}>
+                          {status.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {eSelecionado ? 'Atualmente selecionado' : descricaoStatus[status]}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
+          );
+        })()}
 
-            {confirmandoCancelamento && (
-              <div className="rounded-xl border border-red-200/90 bg-red-50/60 dark:bg-red-950/30 dark:border-red-900/50 p-4 sm:p-5 flex flex-col gap-3">
-                <p className="text-sm text-red-700 dark:text-red-400 font-medium">
-                  Cancelar avisa todos os membros do projeto. Essa ação não pode ser desfeita.
-                </p>
-                <textarea
-                  placeholder="Motivo do cancelamento (opcional)"
-                  value={motivoCancelamento}
-                  onChange={(e) => setMotivoCancelamento(e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/50 rounded-xl outline-none focus:border-red-400 focus:ring-4 focus:ring-red-400/10 transition-all text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 resize-none"
-                />
-                <div className="flex flex-col-reverse sm:flex-row gap-2.5 justify-end pt-1">
-                  <button
-                    type="button"
-                    disabled={alterandoStatus}
-                    onClick={() => { setConfirmandoCancelamento(false); setMotivoCancelamento(''); }}
-                    className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-900 border border-gray-200/90 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
-                  >
-                    Voltar
-                  </button>
-                  <button
-                    type="button"
-                    disabled={alterandoStatus}
-                    onClick={() => handleMudarStatus('CANCELADO', motivoCancelamento.trim() || undefined)}
-                    className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-red-600 hover:bg-red-700 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-xs"
-                  >
-                    {alterandoStatus ? 'Cancelando...' : 'Confirmar cancelamento'}
-                  </button>
-                </div>
-              </div>
-            )}
+        {/* Confirmação de cancelamento */}
+        {confirmandoCancelamento && (
+          <div className="rounded-xl border border-red-200/90 bg-red-50/60 dark:bg-red-950/30 dark:border-red-900/50 p-4 sm:p-5 flex flex-col gap-3">
+            <p className="text-sm text-red-700 dark:text-red-400 font-medium">
+              Cancelar avisa todos os membros do projeto. Essa ação não pode ser desfeita.
+            </p>
+            <textarea
+              placeholder="Motivo do cancelamento (opcional)"
+              value={motivoCancelamento}
+              onChange={(e) => setMotivoCancelamento(e.target.value)}
+              rows={2}
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/50 rounded-xl outline-none focus:border-red-400 focus:ring-4 focus:ring-red-400/10 transition-all text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 resize-none"
+            />
+            <div className="flex flex-col-reverse sm:flex-row gap-2.5 justify-end pt-1">
+              <button
+                type="button"
+                disabled={alterandoStatus}
+                onClick={() => { setConfirmandoCancelamento(false); setMotivoCancelamento(''); }}
+                className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-900 border border-gray-200/90 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                disabled={alterandoStatus}
+                onClick={() => handleMudarStatus('CANCELADO', motivoCancelamento.trim() || undefined)}
+                className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-red-600 hover:bg-red-700 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+              >
+                {alterandoStatus ? 'Cancelando...' : 'Confirmar cancelamento'}
+              </button>
+            </div>
           </div>
         )}
       </section>
+
+      {/* Botões de Ação */}
+      <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-2 border-t border-gray-100 dark:border-slate-800">
+        <Link
+          to={`/detalhes/${id}`}
+          className="w-full sm:w-auto text-center px-6 py-3 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-900 border border-gray-200/90 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+        >
+          Cancelar
+        </Link>
+        <button
+          type="submit"
+          form="form-editar-projeto"
+          disabled={salvando || statusFinal}
+          onClick={handleSubmit}
+          className="w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-semibold text-white bg-primary hover:bg-primary/90 transition-all shadow-md shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+        >
+          {salvando ? 'Salvando...' : 'Salvar alterações'}
+        </button>
+      </div>
     </div>
   );
 }

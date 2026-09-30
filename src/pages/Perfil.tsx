@@ -64,98 +64,37 @@ function obterCorAvatar(nome: string): string {
 
 function formatarNivel(nivel?: string): string {
   if (!nivel) return '';
+  const n = nivel.toUpperCase();
+  if (n === 'INICIANTE') return 'Iniciante';
+  if (n === 'INTERMEDIARIO') return 'Intermediário';
+  if (n === 'AVANCADO' || n === 'AVANÇADO') return 'Avançado';
+  if (n === 'EXPERT') return 'Expert';
   return nivel.charAt(0).toUpperCase() + nivel.slice(1).toLowerCase();
 }
 
-/**
- * Badges de habilidade coloridos por categoria de acordo com o design system (mesmo padrão de EditarPerfil.tsx):
- * - Design / UI / UX / Criativo: Roxo / Violeta (primary)
- * - Tecnologia / Código / Frontend / Backend / Dados: Verde / Teal
- * - Marketing / Negócios / Gestão: Coral / Rose
- * - Fallbacks cicláveis: Âmbar, Índigo, Sky, Esmeralda
- */
-function obterEstiloHabilidade(nomeHabilidade: string): { badge: string; level: string } {
-  const norm = nomeHabilidade.toLowerCase().trim();
+function obterPorcentagemNivel(nivel?: string): number {
+  if (!nivel) return 50;
+  const n = nivel.toUpperCase();
+  if (n.includes('INICIANTE')) return 25;
+  if (n.includes('INTERMEDIARIO')) return 50;
+  if (n.includes('AVANCADO') || n.includes('AVANÇADO')) return 75;
+  if (n.includes('EXPERT') || n.includes('ESPECIALISTA') || n.includes('DOMINA')) return 100;
+  return 50;
+}
 
-  // Design / UI / UX / Criação
-  if (
-    norm.includes('ui') ||
-    norm.includes('ux') ||
-    norm.includes('design') ||
-    norm.includes('figma') ||
-    norm.includes('cria') ||
-    norm.includes('prototip')
-  ) {
-    return {
-      badge: 'bg-purple-50 text-primary border-purple-200/80 dark:bg-primary/15 dark:text-purple-300 dark:border-primary/30',
-      level: 'bg-white/90 dark:bg-slate-900/90 text-primary dark:text-purple-300 border-purple-200/80 dark:border-purple-800/80',
-    };
+function obterEstiloNivelBadge(nivel?: string): string {
+  if (!nivel) return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
+  const n = nivel.toUpperCase();
+  if (n.includes('EXPERT') || n.includes('ESPECIALISTA')) {
+    return 'bg-purple-50 text-primary border-purple-200/80 dark:bg-primary/15 dark:text-purple-300 dark:border-primary/30';
   }
-
-  // Tecnologia / Desenvolvimento / Programação / Dados
-  if (
-    norm.includes('react') ||
-    norm.includes('tech') ||
-    norm.includes('dev') ||
-    norm.includes('js') ||
-    norm.includes('ts') ||
-    norm.includes('code') ||
-    norm.includes('program') ||
-    norm.includes('python') ||
-    norm.includes('java') ||
-    norm.includes('node') ||
-    norm.includes('sql') ||
-    norm.includes('html') ||
-    norm.includes('css') ||
-    norm.includes('git') ||
-    norm.includes('front') ||
-    norm.includes('back')
-  ) {
-    return {
-      badge: 'bg-teal-50 text-teal-700 border-teal-200/80 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-800/60',
-      level: 'bg-white/90 dark:bg-slate-900/90 text-teal-700 dark:text-teal-300 border-teal-200/80 dark:border-teal-800/80',
-    };
+  if (n.includes('AVANCADO') || n.includes('AVANÇADO')) {
+    return 'bg-indigo-50 text-indigo-700 border-indigo-200/80 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800/60';
   }
-
-  // Marketing / Comunicação / Negócios / Gestão
-  if (
-    norm.includes('market') ||
-    norm.includes('seo') ||
-    norm.includes('gest') ||
-    norm.includes('produt') ||
-    norm.includes('comunic') ||
-    norm.includes('venda') ||
-    norm.includes('lead')
-  ) {
-    return {
-      badge: 'bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60',
-      level: 'bg-white/90 dark:bg-slate-900/90 text-rose-700 dark:text-rose-300 border-rose-200/80 dark:border-rose-800/80',
-    };
+  if (n.includes('INTERMEDIARIO')) {
+    return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
   }
-
-  // Fallbacks determinísticos por hash
-  const paletas = [
-    {
-      badge: 'bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60',
-      level: 'bg-white/90 dark:bg-slate-900/90 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/80',
-    },
-    {
-      badge: 'bg-indigo-50 text-indigo-700 border-indigo-200/80 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800/60',
-      level: 'bg-white/90 dark:bg-slate-900/90 text-indigo-700 dark:text-indigo-300 border-indigo-200/80 dark:border-indigo-800/80',
-    },
-    {
-      badge: 'bg-sky-50 text-sky-700 border-sky-200/80 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/60',
-      level: 'bg-white/90 dark:bg-slate-900/90 text-sky-700 dark:text-sky-300 border-sky-200/80 dark:border-sky-800/80',
-    },
-    {
-      badge: 'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60',
-      level: 'bg-white/90 dark:bg-slate-900/90 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/80',
-    },
-  ];
-
-  let h = 0;
-  for (let i = 0; i < nomeHabilidade.length; i++) h = (h * 31 + nomeHabilidade.charCodeAt(i)) >>> 0;
-  return paletas[h % paletas.length];
+  return 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-gray-400 dark:border-slate-700';
 }
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
@@ -375,13 +314,13 @@ export default function Perfil() {
         <div className="px-6 sm:px-8 pb-6 sm:pb-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-14 sm:-mt-16 mb-4">
 
-            {/* Avatar Circular com ring de destaque e leve gradiente */}
+            {/* Avatar: se tiver fotoUrl válida, foto retangular rounded-2xl; se nulo, círculo com iniciais e gradiente */}
             <div className="relative shrink-0">
               {usuario.fotoUrl ? (
                 <img
                   src={usuario.fotoUrl}
                   alt={usuario.nome}
-                  className="h-24 w-24 sm:h-28 sm:w-28 rounded-full object-cover ring-4 ring-white dark:ring-slate-900 shadow-xl bg-white dark:bg-slate-900 shrink-0"
+                  className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl object-cover ring-4 ring-white dark:ring-slate-900 shadow-xl bg-white dark:bg-slate-900 shrink-0"
                 />
               ) : (
                 <div
@@ -447,22 +386,18 @@ export default function Perfil() {
               <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
                 {usuario.nome}
               </h1>
-              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1">
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <div className="flex flex-wrap items-center gap-2.5 mt-1.5">
+                <p className="text-sm font-semibold text-primary dark:text-purple-300">
                   {cursoEPeriodo}
                 </p>
 
-                {/* Nota média resumida junto aos dados cadastrais */}
-                {usuario.notaMedia != null && usuario.totalAvaliacoes != null && (
-                  <span className="inline-flex items-center gap-1 text-sm">
-                    <span className="text-gray-300 dark:text-gray-600">·</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                {/* Badge de nota média com destaque */}
+                {usuario.notaMedia != null && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/50 shadow-2xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400 fill-current" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.299.922-.756 1.688-1.54 1.118l-3.367-2.447a1 1 0 00-1.176 0l-3.368 2.447c-.783.57-1.838-.196-1.539-1.118l1.286-3.957a1 1 0 00-.363-1.118L2.98 9.385c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.951-.69l1.286-3.958z" />
                     </svg>
-                    <span className="font-semibold text-gray-700 dark:text-gray-200">{usuario.notaMedia.toFixed(1)}</span>
-                    <span className="text-xs text-gray-400 dark:text-gray-500">
-                      ({usuario.totalAvaliacoes} {usuario.totalAvaliacoes === 1 ? 'avaliação' : 'avaliações'})
-                    </span>
+                    <span>{usuario.notaMedia.toFixed(1)} Nota média</span>
                   </span>
                 )}
               </div>
@@ -481,95 +416,61 @@ export default function Perfil() {
         </div>
       </Card>
 
-      {/* Cards de Estatística no Topo com Dados Reais Existentes */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {/* Total de Projetos */}
-        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)] flex items-center gap-3.5">
-          <div className="h-11 w-11 rounded-xl bg-purple-50 dark:bg-primary/15 text-primary dark:text-purple-400 flex items-center justify-center shrink-0 border border-purple-100 dark:border-primary/20">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-            </svg>
-          </div>
-          <div>
-            <span className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 leading-none block">
-              {projetos.length}
-            </span>
-            <span className="text-xs font-medium text-gray-400 dark:text-gray-500 mt-1 block">
-              {projetos.length === 1 ? 'Projeto associado' : 'Projetos associados'}
-            </span>
-          </div>
-        </div>
 
-        {/* Total de Habilidades */}
-        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)] flex items-center gap-3.5">
-          <div className="h-11 w-11 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-900/40">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-          </div>
-          <div>
-            <span className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 leading-none block">
-              {habilidades.length}
-            </span>
-            <span className="text-xs font-medium text-gray-400 dark:text-gray-500 mt-1 block">
-              {habilidades.length === 1 ? 'Habilidade cadastrada' : 'Habilidades cadastradas'}
-            </span>
-          </div>
-        </div>
-
-        {/* Nota Média de Avaliações */}
-        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)] flex items-center gap-3.5">
-          <div className="h-11 w-11 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-100 dark:border-amber-900/40">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.299.922-.756 1.688-1.54 1.118l-3.367-2.447a1 1 0 00-1.176 0l-3.368 2.447c-.783.57-1.838-.196-1.539-1.118l1.286-3.957a1 1 0 00-.363-1.118L2.98 9.385c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.951-.69l1.286-3.958z" />
-            </svg>
-          </div>
-          <div>
-            <span className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 leading-none block">
-              {usuario.notaMedia != null ? usuario.notaMedia.toFixed(1) : '—'}
-            </span>
-            <span className="text-xs font-medium text-gray-400 dark:text-gray-500 mt-1 block">
-              {usuario.totalAvaliacoes != null && usuario.totalAvaliacoes > 0
-                ? `Nota média (${usuario.totalAvaliacoes} ${usuario.totalAvaliacoes === 1 ? 'avaliação' : 'avaliações'})`
-                : 'Avaliação média'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Seção: Habilidades com Pills Coloridas por Categoria */}
+      {/* Seção: Habilidades com Grid de Cards e Barra de Progresso */}
       <Card className="p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)]">
-        <div className="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
-          <div className="h-9 w-9 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
-            </svg>
+        <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-purple-50 dark:bg-primary/15 text-primary dark:text-purple-400 flex items-center justify-center shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
+                Habilidades
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Competências e tecnologias dominadas</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
-              Habilidades {habilidades.length > 0 ? `(${habilidades.length})` : ''}
-            </h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Competências e tecnologias dominadas</p>
-          </div>
+          {habilidades.length > 0 && (
+            <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
+              {habilidades.length} {habilidades.length === 1 ? 'competência catalogada' : 'competências catalogadas'}
+            </span>
+          )}
         </div>
 
         {habilidades.length > 0 ? (
-          <div className="flex flex-wrap gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {habilidades.map((h) => {
-              const estilo = obterEstiloHabilidade(h.habilidade.nome);
+              const porcentagem = obterPorcentagemNivel(h.nivel);
 
               return (
-                <span
+                <div
                   key={h.id}
-                  className={`inline-flex items-center gap-2 rounded-full pl-3.5 pr-2 py-1.5 text-xs font-semibold border shadow-2xs transition-all ${estilo.badge}`}
+                  className="bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-4 flex flex-col justify-between gap-3 shadow-2xs hover:border-primary/40 dark:hover:border-primary/40 transition-colors"
                 >
-                  <span>{h.habilidade.nome}</span>
-                  {h.nivel && (
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border shadow-xs ${estilo.level}`}>
-                      {formatarNivel(h.nivel)}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate">
+                      {h.habilidade.nome}
                     </span>
-                  )}
-                </span>
+                    {h.nivel && (
+                      <span
+                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border shadow-2xs shrink-0 ${obterEstiloNivelBadge(h.nivel)}`}
+                      >
+                        {formatarNivel(h.nivel)}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Barra de progresso proporcional ao nível */}
+                  <div className="w-full bg-slate-200/80 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="bg-primary h-full rounded-full transition-all duration-300"
+                      style={{ width: `${porcentagem}%` }}
+                    />
+                  </div>
+                </div>
               );
             })}
           </div>
@@ -582,55 +483,88 @@ export default function Perfil() {
 
       {/* Seção: Avaliações recebidas (feitas por colegas de projeto) */}
       <Card className="p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)]">
-        <div className="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
-          <div className="h-9 w-9 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 dark:text-amber-400 flex items-center justify-center shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.299.922-.756 1.688-1.54 1.118l-3.367-2.447a1 1 0 00-1.176 0l-3.368 2.447c-.783.57-1.838-.196-1.539-1.118l1.286-3.957a1 1 0 00-.363-1.118L2.98 9.385c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.951-.69l1.286-3.958z" />
-            </svg>
+        <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.299.922-.756 1.688-1.54 1.118l-3.367-2.447a1 1 0 00-1.176 0l-3.368 2.447c-.783.57-1.838-.196-1.539-1.118l1.286-3.957a1 1 0 00-.363-1.118L2.98 9.385c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.951-.69l1.286-3.958z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
+                Avaliações
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Feedback recebido de colegas de projetos concluídos</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
-              Avaliações {avaliacoes.length > 0 ? `(${avaliacoes.length})` : ''}
-            </h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Feedback recebido de colegas de projetos concluídos</p>
-          </div>
+          {usuario.notaMedia != null && (
+            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+              {usuario.notaMedia.toFixed(1)} / 5.0{' '}
+              <span className="font-normal text-gray-400 dark:text-gray-500">
+                ({usuario.totalAvaliacoes ?? avaliacoes.length} {((usuario.totalAvaliacoes ?? avaliacoes.length) === 1) ? 'avaliação' : 'avaliações'})
+              </span>
+            </span>
+          )}
         </div>
 
         {avaliacoes.length > 0 ? (
-          <div className="flex flex-col gap-4 divide-y divide-gray-100 dark:divide-slate-800">
+          <div className="flex flex-col gap-4">
             {avaliacoes.map((av) => {
               const jaDenunciada = avaliacoesDenunciadas.has(av.id);
               const denunciandoEsta = denunciandoId === av.id;
 
               return (
-                <div key={av.id} className="flex flex-col gap-2.5 pt-4 first:pt-0">
+                <div
+                  key={av.id}
+                  className="bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-4 sm:p-5 flex flex-col gap-3.5 shadow-2xs hover:border-primary/30 dark:hover:border-primary/30 transition-all"
+                >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span
-                        className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ring-2 ring-white dark:ring-slate-800 shadow-xs ${obterCorAvatar(av.avaliador.nome)}`}
-                      >
-                        {iniciaisDoNome(av.avaliador.nome)}
-                      </span>
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      {av.avaliador.fotoUrl ? (
+                        <img
+                          src={av.avaliador.fotoUrl}
+                          alt={av.avaliador.nome}
+                          className="h-11 w-11 rounded-full object-cover ring-2 ring-primary/20 dark:ring-primary/30 shrink-0"
+                        />
+                      ) : (
+                        <span
+                          className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xs font-bold ring-2 ring-white dark:ring-slate-800 shadow-xs ${obterCorAvatar(av.avaliador.nome)}`}
+                        >
+                          {iniciaisDoNome(av.avaliador.nome)}
+                        </span>
+                      )}
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">{av.avaliador.nome}</p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
-                          {av.projeto.titulo} · {formatarData(av.criadoEm)}
+                        <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">
+                          {av.avaliador.nome}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                          Colega no projeto <span className="font-semibold text-gray-700 dark:text-gray-300">{av.projeto.titulo}</span> · Concluído em {formatarData(av.criadoEm)}
                         </p>
                       </div>
                     </div>
-                    <Estrelas nota={av.nota} />
+
+                    <div className="flex items-center gap-1.5 shrink-0 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 px-2.5 py-1 rounded-xl shadow-2xs">
+                      <Estrelas nota={av.nota} tamanho="h-4 w-4" />
+                      <span className="text-xs font-black text-gray-800 dark:text-gray-200">{av.nota.toFixed(1)}</span>
+                    </div>
                   </div>
 
                   {av.comentario && (
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed pl-12">{av.comentario}</p>
+                    <div className="bg-white/80 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-700/60 rounded-xl p-3.5">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic before:content-['“'] after:content-['”']">
+                        {av.comentario}
+                      </p>
+                    </div>
                   )}
 
                   {/* Denunciar — só o próprio avaliado pode denunciar uma avaliação sobre si */}
                   {isDono && (
                     jaDenunciada ? (
-                      <p className="text-xs text-gray-400 dark:text-gray-500 pl-12 font-medium">Denúncia enviada — em análise.</p>
+                      <p className="self-end text-xs font-medium text-amber-600 dark:text-amber-400">
+                        Denúncia enviada — em análise.
+                      </p>
                     ) : denunciandoEsta ? (
-                      <div className="pl-12 flex flex-col gap-2.5 mt-1">
+                      <div className="flex flex-col gap-2.5 pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
                         {erroDenuncia && (
                           <p role="alert" className="text-xs font-medium text-red-500 dark:text-red-400">{erroDenuncia}</p>
                         )}
@@ -639,7 +573,7 @@ export default function Perfil() {
                           onChange={(e) => setMotivoDenuncia(e.target.value)}
                           placeholder="Explique por que essa avaliação é abusiva ou indevida..."
                           rows={2}
-                          className="w-full rounded-xl border border-gray-200/90 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-800/60 px-3.5 py-2.5 text-xs text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-red-400 focus:border-red-400 transition-colors resize-none"
+                          className="w-full rounded-xl border border-gray-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-xs text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400 transition-colors resize-none"
                         />
                         <div className="flex gap-2 justify-end">
                           <button
@@ -664,9 +598,12 @@ export default function Perfil() {
                       <button
                         type="button"
                         onClick={() => handleAbrirDenuncia(av.id)}
-                        className="self-start pl-12 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
+                        className="self-end text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer flex items-center gap-1"
                       >
-                        Denunciar
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clipRule="evenodd" />
+                        </svg>
+                        <span>Denunciar avaliação abusiva</span>
                       </button>
                     )
                   )}

@@ -75,51 +75,7 @@ function obterEstiloHabilidade(nomeHabilidade: string): string {
   return paletas[h % paletas.length];
 }
 
-function obterContainerHabilidade(nomeHabilidade: string): string {
-  const norm = nomeHabilidade.toLowerCase().trim();
-  if (
-    norm.includes('ui') ||
-    norm.includes('ux') ||
-    norm.includes('design') ||
-    norm.includes('figma') ||
-    norm.includes('cria') ||
-    norm.includes('prototip')
-  ) {
-    return 'border-purple-200/70 bg-purple-50/40 dark:border-purple-900/40 dark:bg-purple-950/20';
-  }
-  if (
-    norm.includes('react') ||
-    norm.includes('tech') ||
-    norm.includes('dev') ||
-    norm.includes('js') ||
-    norm.includes('ts') ||
-    norm.includes('code') ||
-    norm.includes('program') ||
-    norm.includes('python') ||
-    norm.includes('java') ||
-    norm.includes('node') ||
-    norm.includes('sql') ||
-    norm.includes('html') ||
-    norm.includes('css') ||
-    norm.includes('git') ||
-    norm.includes('front') ||
-    norm.includes('back')
-  ) {
-    return 'border-teal-200/70 bg-teal-50/40 dark:border-teal-900/40 dark:bg-teal-950/20';
-  }
-  if (
-    norm.includes('market') ||
-    norm.includes('seo') ||
-    norm.includes('gest') ||
-    norm.includes('produt') ||
-    norm.includes('comunic') ||
-    norm.includes('venda') ||
-    norm.includes('lead')
-  ) {
-    return 'border-rose-200/70 bg-rose-50/40 dark:border-rose-900/40 dark:bg-rose-950/20';
-  }
-  return 'border-gray-200/80 bg-gray-50/60 dark:border-slate-700/70 dark:bg-slate-800/40';
-}
+// obterContainerHabilidade removida — chips agora usam estilo inline por estado (obrigatória/não)
 
 export default function CriarProjeto() {
   const navigate = useNavigate();
@@ -315,12 +271,13 @@ export default function CriarProjeto() {
 
       {/* Cabeçalho */}
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
-          Criar novo projeto
-        </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Descreva o projeto e as habilidades necessárias para atrair os colaboradores certos.
+        {/* Eyebrow text */}
+        <p className="text-[11px] font-bold uppercase tracking-widest text-primary dark:text-purple-400">
+          Novo Registro Acadêmico
         </p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
+          Criar Projeto
+        </h1>
       </div>
 
       {/* Card do Formulário */}
@@ -393,22 +350,30 @@ export default function CriarProjeto() {
 
           {/* Vagas e Prazo */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Número de vagas com ícone de grupo */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Número de vagas
+                Número de vagas <span className="text-red-400">*</span>
               </label>
-              <input
-                type="number"
-                min={1}
-                value={vagas}
-                onChange={(e) => { setVagas(e.target.value); limparErroCampo('vagas'); }}
-                aria-invalid={!!errosCampo.vagas}
-                className={`w-full rounded-xl border px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 outline-none transition-all duration-150 ${
-                  errosCampo.vagas
-                    ? 'border-red-400 dark:border-red-500/80 bg-red-50/30 dark:bg-red-950/20 focus:border-red-400 focus:ring-4 focus:ring-red-400/10'
-                    : 'border-gray-200/90 dark:border-slate-700/80 bg-gray-50/60 dark:bg-slate-800/60 hover:border-gray-300 dark:hover:border-slate-600 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white dark:focus:bg-slate-800'
-                }`}
-              />
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-gray-400 dark:text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </span>
+                <input
+                  type="number"
+                  min={1}
+                  value={vagas}
+                  onChange={(e) => { setVagas(e.target.value); limparErroCampo('vagas'); }}
+                  aria-invalid={!!errosCampo.vagas}
+                  className={`w-full rounded-xl border pl-10 pr-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 outline-none transition-all duration-150 ${
+                    errosCampo.vagas
+                      ? 'border-red-400 dark:border-red-500/80 bg-red-50/30 dark:bg-red-950/20 focus:border-red-400 focus:ring-4 focus:ring-red-400/10'
+                      : 'border-gray-200/90 dark:border-slate-700/80 bg-gray-50/60 dark:bg-slate-800/60 hover:border-gray-300 dark:hover:border-slate-600 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white dark:focus:bg-slate-800'
+                  }`}
+                />
+              </div>
               {errosCampo.vagas && (
                 <p role="alert" className="text-xs font-medium text-red-500 dark:text-red-400 flex items-center gap-1 mt-0.5">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -419,89 +384,56 @@ export default function CriarProjeto() {
               )}
             </div>
 
+            {/* Prazo final com ícone de calendário */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Prazo final (opcional)
               </label>
-              <input
-                type="date"
-                value={dataFim}
-                min={formatarDataISO(new Date())}
-                max={formatarDataISO(adicionarAnos(new Date(), ANOS_MAXIMOS_PRAZO))}
-                onChange={(e) => { setDataFim(e.target.value); limparErroCampo('dataFim'); }}
-                aria-invalid={!!errosCampo.dataFim}
-                className={`w-full rounded-xl border px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 outline-none transition-all duration-150 ${
-                  errosCampo.dataFim
-                    ? 'border-red-400 dark:border-red-500/80 bg-red-50/30 dark:bg-red-950/20 focus:border-red-400 focus:ring-4 focus:ring-red-400/10'
-                    : 'border-gray-200/90 dark:border-slate-700/80 bg-gray-50/60 dark:bg-slate-800/60 hover:border-gray-300 dark:hover:border-slate-600 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white dark:focus:bg-slate-800'
-                }`}
-              />
-              {errosCampo.dataFim && (
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-gray-400 dark:text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </span>
+                <input
+                  type="date"
+                  value={dataFim}
+                  min={formatarDataISO(new Date())}
+                  max={formatarDataISO(adicionarAnos(new Date(), ANOS_MAXIMOS_PRAZO))}
+                  onChange={(e) => { setDataFim(e.target.value); limparErroCampo('dataFim'); }}
+                  aria-invalid={!!errosCampo.dataFim}
+                  className={`w-full rounded-xl border pl-10 pr-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 outline-none transition-all duration-150 ${
+                    errosCampo.dataFim
+                      ? 'border-red-400 dark:border-red-500/80 bg-red-50/30 dark:bg-red-950/20 focus:border-red-400 focus:ring-4 focus:ring-red-400/10'
+                      : 'border-gray-200/90 dark:border-slate-700/80 bg-gray-50/60 dark:bg-slate-800/60 hover:border-gray-300 dark:hover:border-slate-600 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white dark:focus:bg-slate-800'
+                  }`}
+                />
+              </div>
+              {errosCampo.dataFim ? (
                 <p role="alert" className="text-xs font-medium text-red-500 dark:text-red-400 flex items-center gap-1 mt-0.5">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                   {errosCampo.dataFim}
                 </p>
+              ) : (
+                <p className="text-xs text-gray-400 dark:text-gray-500">
+                  Deixe em branco caso o projeto não possua data limite fixa.
+                </p>
               )}
             </div>
           </div>
 
-          {/* Habilidades necessárias */}
+          {/* Habilidades desejadas */}
           <div className="flex flex-col gap-3 pt-2">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Habilidades necessárias (opcional)
+                Habilidades desejadas <span className="text-red-400">*</span>
               </label>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                Defina as competências ideais para quem deseja participar
+                Busque competências no catálogo (mínimo 2 letras). Cada habilidade adicionada pode ser marcada como obrigatória ou removida.
               </p>
             </div>
-
-            {/* Habilidades já escolhidas */}
-            {habilidadesSelecionadas.length > 0 && (
-              <div className="flex flex-col gap-2">
-                {habilidadesSelecionadas.map(({ habilidade, obrigatoria }) => (
-                  <div
-                    key={habilidade.id}
-                    className={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border transition-all ${obterContainerHabilidade(habilidade.nome)}`}
-                  >
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${obterEstiloHabilidade(habilidade.nome)}`}>
-                        {habilidade.nome}
-                      </span>
-                      {habilidade.categoria && (
-                        <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider">
-                          {habilidade.categoria}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-3.5 shrink-0">
-                      <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={obrigatoria}
-                          onChange={() => alternarObrigatoria(habilidade.id)}
-                          className="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-primary focus:ring-primary/20 accent-[#5B4CF5]"
-                        />
-                        Obrigatória
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => removerHabilidade(habilidade.id)}
-                        aria-label={`Remover ${habilidade.nome}`}
-                        className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer"
-                      >
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
 
             {/* Campo de busca no catálogo */}
             <div className="relative">
@@ -520,42 +452,105 @@ export default function CriarProjeto() {
             </div>
 
             {/* Resultados da busca */}
-            {buscaHabilidade.trim().length < 2 ? (
-              <p className="text-xs text-gray-400 dark:text-gray-500">Digite ao menos 2 letras para buscar uma habilidade no catálogo.</p>
-            ) : buscandoSugestoes ? (
-              <p className="text-xs text-gray-400 dark:text-gray-500">Buscando…</p>
-            ) : erroBuscaHabilidade ? (
-              <p className="text-xs text-red-500 dark:text-red-400">{erroBuscaHabilidade}</p>
-            ) : sugestoes.length === 0 ? (
-              <p className="text-xs text-gray-400 dark:text-gray-500">
-                Nenhuma habilidade encontrada para "{buscaHabilidade}".
-              </p>
-            ) : (
-              <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
-                {sugestoes.map((habilidade) => (
-                  <button
-                    type="button"
-                    key={habilidade.id}
-                    onClick={() => adicionarHabilidade(habilidade)}
-                    className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-gray-50/70 dark:bg-slate-800/60 hover:bg-purple-50/60 dark:hover:bg-primary/10 border border-gray-200/60 dark:border-slate-700/60 hover:border-primary/30 transition-all text-left group cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2.5 min-w-0">
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${obterEstiloHabilidade(habilidade.nome)}`}>
-                        {habilidade.nome}
-                      </span>
-                      {habilidade.categoria && (
-                        <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider">
-                          {habilidade.categoria}
+            {buscaHabilidade.trim().length < 2 ? null
+              : buscandoSugestoes ? (
+                <p className="text-xs text-gray-400 dark:text-gray-500">Buscando…</p>
+              ) : erroBuscaHabilidade ? (
+                <p className="text-xs text-red-500 dark:text-red-400">{erroBuscaHabilidade}</p>
+              ) : sugestoes.length === 0 ? (
+                <p className="text-xs text-gray-400 dark:text-gray-500">
+                  Nenhuma habilidade encontrada para "{buscaHabilidade}".
+                </p>
+              ) : (
+                <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
+                  {sugestoes.map((habilidade) => (
+                    <button
+                      type="button"
+                      key={habilidade.id}
+                      onClick={() => adicionarHabilidade(habilidade)}
+                      className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-gray-50/70 dark:bg-slate-800/60 hover:bg-purple-50/60 dark:hover:bg-primary/10 border border-gray-200/60 dark:border-slate-700/60 hover:border-primary/30 transition-all text-left group cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2.5 min-w-0">
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${obterEstiloHabilidade(habilidade.nome)}`}>
+                          {habilidade.nome}
                         </span>
-                      )}
+                        {habilidade.categoria && (
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider">
+                            {habilidade.categoria}
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-primary font-bold text-lg leading-none shrink-0 group-hover:scale-110 transition-transform">
+                        +
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )
+            }
+
+            {/* Habilidades já escolhidas — chips em wrap horizontal */}
+            {habilidadesSelecionadas.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 rounded-xl border border-slate-200/80 dark:border-slate-700/60 bg-gray-50/40 dark:bg-slate-800/30">
+                {habilidadesSelecionadas.map(({ habilidade, obrigatoria }) => (
+                  <div
+                    key={habilidade.id}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                      obrigatoria
+                        ? 'border-primary/30 bg-purple-50/80 dark:bg-primary/10 dark:border-primary/40'
+                        : 'border-gray-200/80 bg-white dark:bg-slate-800 dark:border-slate-700/60'
+                    }`}
+                  >
+                    {/* Nome */}
+                    <span className={`font-semibold ${
+                      obrigatoria ? 'text-primary dark:text-purple-300' : 'text-gray-700 dark:text-gray-200'
+                    }`}>
+                      {habilidade.nome}
                     </span>
-                    <span className="text-primary font-bold text-lg leading-none shrink-0 group-hover:scale-110 transition-transform">
-                      +
-                    </span>
-                  </button>
+
+                    {/* Toggle obrigatória */}
+                    <label
+                      className="flex items-center gap-1 cursor-pointer select-none"
+                      title={obrigatoria ? 'Desmarcar como obrigatória' : 'Marcar como obrigatória'}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={obrigatoria}
+                        onChange={() => alternarObrigatoria(habilidade.id)}
+                        className="h-3.5 w-3.5 rounded border-gray-300 dark:border-slate-600 text-primary focus:ring-primary/20 accent-[#5B4CF5]"
+                      />
+                      <span className={`text-[10px] font-semibold uppercase tracking-wide ${
+                        obrigatoria ? 'text-primary dark:text-purple-300' : 'text-gray-400 dark:text-gray-500'
+                      }`}>
+                        Obrigatória
+                      </span>
+                    </label>
+
+                    {/* Botão remover */}
+                    <button
+                      type="button"
+                      onClick={() => removerHabilidade(habilidade.id)}
+                      aria-label={`Remover ${habilidade.nome}`}
+                      className="ml-0.5 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors rounded p-0.5 hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer"
+                    >
+                      <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Aviso informativo */}
+          <div className="flex items-start gap-3 rounded-xl border border-blue-200/70 bg-blue-50/60 dark:bg-blue-950/20 dark:border-blue-900/40 px-4 py-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+              A capa e imagem de destaque do projeto poderão ser adicionadas na tela de Detalhes após a publicação.
+            </p>
           </div>
 
           {/* Botões de Ação */}
