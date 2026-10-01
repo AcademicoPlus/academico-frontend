@@ -186,7 +186,7 @@ export default function Dashboard() {
         <button onClick={(e) => { e.stopPropagation(); proximoBanner(); }} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/20 hover:bg-black/50 text-white p-2 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 hidden md:block"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg></button>
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {BANNERS.map((_, index) => (
-            <button key={index} onClick={(e) => { e.stopPropagation(); setBannerAtual(index); }} className={`h-2 rounded-full transition-all duration-300 ${index === bannerAtual ? 'bg-[#F27405] w-8' : 'bg-white/60 hover:bg-white w-2'}`} />
+            <button key={index} onClick={(e) => { e.stopPropagation(); setBannerAtual(index); }} aria-label={`Banner ${index + 1}`} className="py-2 px-1 -my-2"><span className={`block h-2 rounded-full transition-all duration-300 ${index === bannerAtual ? 'bg-[#F27405] w-8' : 'bg-white/60 hover:bg-white w-2'}`} /></button>
           ))}
         </div>
       </div>

@@ -16,7 +16,8 @@ export default function Mensagens() {
   const conversaAberta = projetoId ? caixa.conversas.find((c) => c.projeto.id === projetoId) ?? null : null;
 
   return (
-    <div className="h-full max-w-6xl mx-auto flex bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+    // No celular ocupa a área útil inteira (compensa o padding do <main>) — cada pixel conta no chat.
+    <div className="-m-4 h-[calc(100%+2rem)] md:m-0 md:h-full max-w-6xl md:mx-auto flex bg-white dark:bg-slate-900 md:rounded-2xl md:border border-gray-100 dark:border-slate-700 md:shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
       <aside
         className={`${projetoId ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-80 lg:w-96 md:border-r border-gray-100 dark:border-slate-800 min-h-0`}
       >

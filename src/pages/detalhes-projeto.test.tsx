@@ -79,14 +79,18 @@ function convitePendente(overrides: Partial<conviteService.Convite> = {}): convi
   };
 }
 
-function renderPagina() {
+function renderPagina(rota = '/detalhes/proj-1') {
   return render(
-    <MemoryRouter initialEntries={['/detalhes/proj-1']}>
+    <MemoryRouter initialEntries={[rota]}>
       <Routes>
         <Route path="/detalhes/:id" element={<DetalhesProjetoRota />} />
       </Routes>
     </MemoryRouter>,
   );
+}
+
+async function abrirAba(nome: RegExp) {
+  await userEvent.click(await screen.findByRole('tab', { name: nome }));
 }
 
 describe('DetalhesProjeto', () => {
@@ -96,6 +100,81 @@ describe('DetalhesProjeto', () => {
     vi.spyOn(recomendacaoService, 'recomendarCandidatos').mockResolvedValue([]);
     vi.spyOn(conviteService, 'listarConvitesDoProjeto').mockResolvedValue(paginaVazia());
     vi.spyOn(conviteService, 'listarConvitesRecebidos').mockResolvedValue(paginaVazia());
+  });
+
+  it('mostra a aba Gerenciar só para o criador, com o número de candidaturas pendentes', async () => {
+    vi.spyOn(useMeuPerfilHook, 'obterMeuPerfilCache').mockResolvedValue({ id: 'user-1' } as never);
+    vi.spyOn(projetoService, 'buscarProjetoPorId').mockResolvedValue(projetoBase());
+    vi.spyOn(candidaturaService, 'listarCandidaturasDoProjeto').mockResolvedValue({
+      ...paginaVazia(),
+      content: [{
+        id: 'cand-1', projeto: { id: 'proj-1', titulo: 'Projeto Teste', status: 'ABERTO' }, usuario: CANDIDATO,
+        status: 'PENDENTE', mensagem: null, motivoRejeicao: null, dataCandidatura: '2026-01-02T00:00:00Z', dataResposta: null,
+      }],
+      totalElements: 1,
+    });
+
+    renderPagina();
+
+    const gerenciar = await screen.findByRole('tab', { name: /gerenciar/i });
+    expect(within(gerenciar).getByLabelText('1 pendentes')).toBeInTheDocument();
+    // Abre em "Sobre" por padrão
+    expect(screen.getByRole('tab', { name: /sobre/i })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tabpanel')).toHaveTextContent('Descrição do projeto de teste.');
+  });
+
+  it('não mostra a aba Gerenciar para quem não é o criador, mesmo pedindo pela URL', async () => {
+    vi.spyOn(useMeuPerfilHook, 'obterMeuPerfilCache').mockResolvedValue({ id: 'user-2' } as never);
+    vi.spyOn(projetoService, 'buscarProjetoPorId').mockResolvedValue(projetoBase());
+    vi.spyOn(candidaturaService, 'listarMinhasCandidaturas').mockResolvedValue(paginaVazia());
+
+    renderPagina('/detalhes/proj-1?aba=gerenciar');
+
+    expect(await screen.findByRole('tab', { name: /sobre/i })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.queryByRole('tab', { name: /gerenciar/i })).not.toBeInTheDocument();
+    expect(candidaturaService.listarCandidaturasDoProjeto).not.toHaveBeenCalled();
+  });
+
+  it('abre direto na aba pedida pela URL e navega entre abas com as setas', async () => {
+    vi.spyOn(useMeuPerfilHook, 'obterMeuPerfilCache').mockResolvedValue({ id: 'user-2' } as never);
+    vi.spyOn(projetoService, 'buscarProjetoPorId').mockResolvedValue(projetoBase());
+    vi.spyOn(candidaturaService, 'listarMinhasCandidaturas').mockResolvedValue(paginaVazia());
+
+    renderPagina('/detalhes/proj-1?aba=equipe');
+
+    const equipe = await screen.findByRole('tab', { name: /equipe/i });
+    expect(equipe).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tabpanel')).toHaveTextContent(/equipe atual/i);
+
+    equipe.focus();
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(screen.getByRole('tab', { name: /sobre/i })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: /sobre/i })).toHaveFocus();
+  });
+
+  it('no celular fixa a ação de candidatar no rodapé e esconde a lateral fora da aba Sobre', async () => {
+    const matchMediaOriginal = window.matchMedia;
+    window.matchMedia = vi.fn().mockReturnValue({
+      matches: false, addEventListener: () => {}, removeEventListener: () => {},
+    }) as unknown as typeof window.matchMedia;
+    try {
+      vi.spyOn(useMeuPerfilHook, 'obterMeuPerfilCache').mockResolvedValue({ id: 'user-2' } as never);
+      vi.spyOn(projetoService, 'buscarProjetoPorId').mockResolvedValue(projetoBase());
+      vi.spyOn(candidaturaService, 'listarMinhasCandidaturas').mockResolvedValue(paginaVazia());
+
+      renderPagina();
+
+      const rodape = await screen.findByTestId('acao-rodape');
+      expect(within(rodape).getByRole('button', { name: /quero me candidatar/i })).toBeInTheDocument();
+      // Um botão só — não duplica na lateral
+      expect(screen.getAllByRole('button', { name: /quero me candidatar/i })).toHaveLength(1);
+
+      await abrirAba(/equipe/i);
+      expect(screen.getByRole('complementary', { hidden: true })).toHaveClass('hidden');
+      expect(screen.getByTestId('acao-rodape')).toBeInTheDocument();
+    } finally {
+      window.matchMedia = matchMediaOriginal;
+    }
   });
 
   it('permite que um candidato envie uma candidatura', async () => {
@@ -152,6 +231,7 @@ describe('DetalhesProjeto', () => {
 
     renderPagina();
 
+    await abrirAba(/gerenciar/i);
     expect(await screen.findByText('Bruno Alves')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /^aceitar$/i }));
 
@@ -187,20 +267,20 @@ describe('DetalhesProjeto', () => {
     renderPagina();
 
     // Candidatos recomendados
+    await abrirAba(/gerenciar/i);
     expect(await screen.findByText('Candidatos Recomendados')).toBeInTheDocument();
     expect(screen.getByText('Carla Mendes')).toBeInTheDocument();
     expect(screen.getByText('80%')).toBeInTheDocument();
 
     // Projeto concluído: equipe congelada — sem convidar nem remover
     expect(screen.queryByRole('button', { name: /convidar/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /remover bruno alves/i })).not.toBeInTheDocument();
 
     // Avaliar membro da equipe
-    const cardMembro = screen.getByText('Bruno Alves').closest('div.bg-gray-50') as HTMLElement;
+    await abrirAba(/equipe/i);
+    expect(screen.queryByRole('button', { name: /remover bruno alves/i })).not.toBeInTheDocument();
+    const cardMembro = screen.getByTestId('membro-membro-1');
     await userEvent.click(within(cardMembro).getByRole('button', { name: /avaliar/i }));
-
-    const cardMembroAtualizado = screen.getByText('Bruno Alves').closest('div.bg-gray-50') as HTMLElement;
-    await userEvent.click(within(cardMembroAtualizado).getByRole('button', { name: /enviar avaliação/i }));
+    await userEvent.click(within(cardMembro).getByRole('button', { name: /enviar avaliação/i }));
 
     await waitFor(() => expect(avaliacaoService.avaliarParticipante).toHaveBeenCalledWith('proj-1', 'user-2', 5, undefined));
     expect(await screen.findByText(/avaliado/i)).toBeInTheDocument();
@@ -220,6 +300,7 @@ describe('DetalhesProjeto', () => {
 
     renderPagina();
 
+    await abrirAba(/gerenciar/i);
     await userEvent.click(await screen.findByRole('button', { name: /^✉ convidar$/i }));
     const modal = await screen.findByRole('dialog');
     expect(within(modal).getByText('Carla Mendes')).toBeInTheDocument();
@@ -271,6 +352,7 @@ describe('DetalhesProjeto', () => {
 
     renderPagina();
 
+    await abrirAba(/equipe/i);
     await userEvent.click(await screen.findByRole('button', { name: /remover bruno alves do projeto/i }));
     const modal = await screen.findByRole('dialog');
     expect(within(modal).getByText(/remover bruno alves da equipe/i)).toBeInTheDocument();
@@ -326,6 +408,7 @@ describe('DetalhesProjeto', () => {
 
     renderPagina();
 
+    await abrirAba(/gerenciar/i);
     expect(await screen.findByText('Bruno Alves')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /^rejeitar$/i }));
 

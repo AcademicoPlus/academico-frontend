@@ -76,27 +76,27 @@ export default function Candidaturas() {
       </div>
 
       {/* Cards de Status */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm text-center">
-          <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{contagem.PENDENTE}</p>
-          <p className="text-sm font-bold text-orange-500 bg-orange-50 dark:bg-orange-950/40 w-fit mx-auto px-3 py-1 rounded-full mt-2">🕒 Pendente</p>
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
+        <div className="bg-white dark:bg-slate-900 p-3 sm:p-6 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm text-center">
+          <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">{contagem.PENDENTE}</p>
+          <p className="text-[11px] sm:text-sm font-bold text-orange-500 bg-orange-50 dark:bg-orange-950/40 w-fit mx-auto px-2 sm:px-3 py-1 rounded-full mt-2 whitespace-nowrap">🕒 Pendente</p>
         </div>
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm text-center">
-          <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{contagem.ACEITO}</p>
-          <p className="text-sm font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/40 w-fit mx-auto px-3 py-1 rounded-full mt-2">✓ Aceito</p>
+        <div className="bg-white dark:bg-slate-900 p-3 sm:p-6 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm text-center">
+          <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">{contagem.ACEITO}</p>
+          <p className="text-[11px] sm:text-sm font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/40 w-fit mx-auto px-2 sm:px-3 py-1 rounded-full mt-2 whitespace-nowrap">✓ Aceito</p>
         </div>
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm text-center">
-          <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{contagem.REJEITADO}</p>
-          <p className="text-sm font-bold text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/40 w-fit mx-auto px-3 py-1 rounded-full mt-2">✕ Rejeitado</p>
+        <div className="bg-white dark:bg-slate-900 p-3 sm:p-6 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm text-center">
+          <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">{contagem.REJEITADO}</p>
+          <p className="text-[11px] sm:text-sm font-bold text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/40 w-fit mx-auto px-2 sm:px-3 py-1 rounded-full mt-2 whitespace-nowrap">✕ Rejeitado</p>
         </div>
       </div>
 
       {/* Filtro por status */}
-      <div className="flex justify-end mb-6">
+      <div className="flex sm:justify-end mb-6">
         <select
           value={filtroStatus}
           onChange={(e) => setFiltroStatus(e.target.value as StatusCandidatura | '')}
-          className="px-5 py-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:border-[#F27405] focus:ring-4 focus:ring-[#F27405]/10 font-medium text-gray-700 dark:text-gray-200 shadow-sm cursor-pointer"
+          className="w-full sm:w-auto px-5 py-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:border-[#F27405] focus:ring-4 focus:ring-[#F27405]/10 font-medium text-gray-700 dark:text-gray-200 shadow-sm cursor-pointer"
         >
           <option value="">Todos os status</option>
           {OPCOES_STATUS.map((status) => (
@@ -151,17 +151,17 @@ export default function Candidaturas() {
                 </div>
               )}
 
-              <div className="flex justify-end items-center mt-4 gap-4">
+              <div className="flex flex-wrap justify-end items-center mt-4 gap-2">
                 {candidatura.status === 'PENDENTE' && (
                   <button
                     type="button"
                     onClick={() => { setErro(null); setCandidaturaParaCancelar(candidatura); }}
-                    className="text-xs font-bold text-red-500 hover:underline"
+                    className="px-3 py-2 rounded-lg text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40"
                   >
                     Cancelar candidatura
                   </button>
                 )}
-                <Link to={`/detalhes/${candidatura.projeto.id}`} className="text-xs font-bold text-[#F27405] hover:underline">
+                <Link to={`/detalhes/${candidatura.projeto.id}`} className="px-3 py-2 rounded-lg text-xs font-bold text-[#F27405] hover:bg-orange-50 dark:hover:bg-orange-950/40">
                   Ver detalhes do projeto →
                 </Link>
               </div>

@@ -93,7 +93,7 @@ export default function ConversaAberta({
         <Link
           to="/mensagens"
           aria-label="Voltar para as conversas"
-          className="md:hidden -ml-1 p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800"
+          className="md:hidden -ml-2 p-2.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
         </Link>
@@ -112,7 +112,7 @@ export default function ConversaAberta({
         </div>
         <Link
           to={`/detalhes/${conversa.projeto.id}`}
-          className="shrink-0 text-xs font-bold text-[#F27405] hover:underline"
+          className="shrink-0 -mr-2 px-2 py-2.5 text-xs font-bold text-[#F27405] hover:underline"
         >
           Ver projeto →
         </Link>

@@ -537,7 +537,7 @@ export default function Perfil() {
                         <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">
                           {av.avaliador.nome}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">
                           Colega no projeto <span className="font-semibold text-gray-700 dark:text-gray-300">{av.projeto.titulo}</span> · Concluído em {formatarData(av.criadoEm)}
                         </p>
                       </div>

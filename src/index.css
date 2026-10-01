@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* iOS Safari dá zoom automático ao focar um campo com fonte menor que 16px
+   (e não volta sozinho). Em telas de toque os campos usam 16px. */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 @theme {
   --color-primary: #5B4CF5;
   --color-background: #F7F8FC;

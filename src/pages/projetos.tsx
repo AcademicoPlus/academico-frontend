@@ -102,7 +102,7 @@ export default function Projetos() {
             <div key={proj.id} className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col overflow-hidden group hover:shadow-[0_15px_40px_rgb(0,0,0,0.08)] transition-all duration-300">
 
               {/* Capa do Card Clicável */}
-              <Link to={`/detalhes/${proj.id}`} className="relative h-56 overflow-hidden bg-linear-to-br from-[#183E6C] to-[#0B1D33] block cursor-pointer">
+              <Link to={`/detalhes/${proj.id}`} className="relative h-36 sm:h-56 overflow-hidden bg-linear-to-br from-[#183E6C] to-[#0B1D33] block cursor-pointer">
                 {proj.bannerUrl && (
                   <img
                     src={proj.bannerUrl}
