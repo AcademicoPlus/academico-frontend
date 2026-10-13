@@ -475,9 +475,13 @@ export default function EditarPerfil() {
         nome: nome.trim(),
         idCurso: idCurso || undefined,
         periodo: periodo ? Number(periodo) : undefined,
-        bio: bio.trim() || undefined,
-        linkedinUrl: linkedin.trim() || undefined,
-        githubUrl: github.trim() || undefined,
+        // String vazia (e nao undefined) para dar conta de LIMPAR o campo:
+        // JSON.stringify descarta chaves undefined e o backend so sobrescreve
+        // o que vier preenchido no corpo, entao mandar undefined mantinha o
+        // valor antigo no banco.
+        bio: bio.trim(),
+        linkedinUrl: linkedin.trim(),
+        githubUrl: github.trim(),
       });
       atualizarCacheMeuPerfil(perfilAtualizado);
       setSucesso(true);
@@ -637,23 +641,13 @@ export default function EditarPerfil() {
                 className="hidden"
                 id="foto-perfil-input"
               />
-              <label
-                htmlFor="foto-perfil-input"
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-[#4E3FE4] shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all cursor-pointer w-fit ${
-                  enviandoFoto ? 'opacity-50 pointer-events-none' : ''
-                }`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-                </svg>
-                <span>{enviandoFoto ? 'Enviando foto…' : 'Alterar foto'}</span>
-              </label>
+
               {fotoUrl && (
                 <button
                   type="button"
                   onClick={() => setConfirmandoRemocaoFoto(true)}
                   disabled={enviandoFoto || removendoFoto}
-                  className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-[#4E3FE4] shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all cursor-pointer w-fit"
                 >
                   Remover foto
                 </button>

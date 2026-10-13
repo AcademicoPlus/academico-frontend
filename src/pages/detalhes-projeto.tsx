@@ -29,6 +29,8 @@ import type { UsuarioResumo } from '../services/authService'
 import ErroCard from '../components/ErroCard'
 import ConfirmModal from '../components/ConfirmModal'
 import ModalConvidarPessoa from '../components/ModalConvidarPessoa'
+import DenunciaModal, { mensagemDeErroDeDenuncia } from '../components/DenunciaModal'
+import { denunciarProjeto, type DenunciarPayload } from '../services/denunciaService'
 import CapaProjeto from '../components/projeto/CapaProjeto'
 import AbasProjeto, { type DefinicaoAba } from '../components/projeto/AbasProjeto'
 import AbaSobre from '../components/projeto/AbaSobre'
@@ -93,6 +95,12 @@ function DetalhesProjeto({ id }: { id: string }) {
 
   // Ação pendente de confirmação — um único modal cobre todas elas.
   const [acaoConfirmavel, setAcaoConfirmavel] = useState<AcaoConfirmavel | null>(null);
+
+  // ── Denúncia do projeto ────────────────────────────────────────────────────
+  const [denunciandoProjeto, setDenunciandoProjeto] = useState(false);
+  const [enviandoDenuncia, setEnviandoDenuncia] = useState(false);
+  const [projetoDenunciado, setProjetoDenunciado] = useState(false);
+  const [erroDenuncia, setErroDenuncia] = useState<string | null>(null);
   const [confirmandoAcao, setConfirmandoAcao] = useState(false);
 
   const [enviandoBanner, setEnviandoBanner] = useState(false);
@@ -315,6 +323,25 @@ function DetalhesProjeto({ id }: { id: string }) {
   }
 
   const souCriador = meuId !== null && projeto.criador?.id === meuId;
+
+  async function handleDenunciarProjeto(dados: DenunciarPayload) {
+    if (!projeto) return;
+
+    setEnviandoDenuncia(true);
+    setErroDenuncia(null);
+    try {
+      await denunciarProjeto(projeto.id, dados);
+      setProjetoDenunciado(true);
+      setDenunciandoProjeto(false);
+    } catch (e) {
+      // Modal segue aberto: a mensagem é exibida nele, e a pessoa pode
+      // corrigir o relato e tentar de novo sem reabrir tudo.
+      setErroDenuncia(mensagemDeErroDeDenuncia(e));
+    } finally {
+      setEnviandoDenuncia(false);
+    }
+  }
+
   const meuVinculo = membros.find((m) => m.usuario?.id === meuId) ?? null;
   const souMembro = souCriador || meuVinculo !== null;
   // Equipe congelada após o encerramento — é a base das avaliações.
@@ -440,6 +467,29 @@ function DetalhesProjeto({ id }: { id: string }) {
             aria-label="Resumo do projeto"
           >
             <PainelLateralProjeto {...propsDoPainel} souMembro={souMembro} semAcao={acaoNoRodape} />
+
+            {/* Denunciar — não faz sentido no projeto do próprio criador, que
+                já pode encerrá-lo pela aba Gerenciar. */}
+            {!souCriador && (
+              <div className="mt-3 flex flex-col items-end gap-1">
+                {projetoDenunciado ? (
+                  <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                    Denúncia enviada — em análise.
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => { setErroDenuncia(null); setDenunciandoProjeto(true); }}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clipRule="evenodd" />
+                    </svg>
+                    <span>Denunciar projeto</span>
+                  </button>
+                )}
+              </div>
+            )}
           </aside>
         </div>
       </div>
@@ -451,6 +501,17 @@ function DetalhesProjeto({ id }: { id: string }) {
         >
           <AcaoPrincipal {...propsDoPainel} />
         </div>
+      )}
+
+      {denunciandoProjeto && (
+        <DenunciaModal
+          titulo="Denunciar projeto"
+          descricaoAlvo={`o projeto "${projeto.titulo}"`}
+          enviando={enviandoDenuncia}
+          erroEnvio={erroDenuncia}
+          onEnviar={handleDenunciarProjeto}
+          onCancelar={() => { setErroDenuncia(null); setDenunciandoProjeto(false); }}
+        />
       )}
 
       {acaoConfirmavel && (

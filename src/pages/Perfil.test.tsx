@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ApiError } from '../services/apiClient';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -16,7 +17,12 @@ vi.mock('../services/usuarioService');
 vi.mock('../hooks/useMeuPerfil');
 vi.mock('../services/projetoService');
 vi.mock('../services/avaliacaoService');
-vi.mock('../services/denunciaService');
+vi.mock('../services/denunciaService', async (importOriginal) => {
+  // CATEGORIAS_DENUNCIA é dado, não comportamento: o modal monta o select a
+  // partir dela, então precisa vir do módulo real.
+  const real = await importOriginal<typeof denunciaService>();
+  return { ...real, denunciarAvaliacao: vi.fn(), denunciarPerfil: vi.fn() };
+});
 
 const AVALIADOR: UsuarioResumo = {
   id: 'user-9', nome: 'Carla Souza', curso: 'Design', fotoUrl: null,
@@ -90,8 +96,10 @@ describe('Perfil', () => {
     expect(screen.getByText('Carla Souza')).toBeInTheDocument();
     expect(screen.getByText('Ótimo colega de equipe.')).toBeInTheDocument();
 
-    // Como não é o dono, não deve ver a opção de denunciar
-    expect(screen.queryByRole('button', { name: /denunciar/i })).not.toBeInTheDocument();
+    // Não é o dono: pode denunciar o perfil alheio, mas não as avaliações
+    // recebidas por ele — essas só o próprio avaliado pode denunciar.
+    expect(screen.getByRole('button', { name: /denunciar perfil/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /denunciar avaliação/i })).not.toBeInTheDocument();
   });
 
   it('permite que o dono do perfil denuncie uma avaliação recebida', async () => {
@@ -118,29 +126,99 @@ describe('Perfil', () => {
     });
     vi.spyOn(denunciaService, 'denunciarAvaliacao').mockResolvedValue({
       id: 'den-1',
-      avaliacaoId: 'aval-1',
-      avaliador: AVALIADOR,
-      notaAvaliacao: 5,
-      comentarioAvaliacao: 'Ótimo colega de equipe.',
+      tipoAlvo: 'AVALIACAO',
+      alvo: {
+        id: 'aval-1',
+        titulo: 'Avaliação de Carla Souza',
+        conteudo: 'Ótimo colega de equipe.',
+        nota: 5,
+        autor: AVALIADOR,
+      },
+      responsavel: AVALIADOR,
       denunciante: AVALIADOR,
-      motivo: 'Comentário ofensivo',
+      categoria: 'CONTEUDO_OFENSIVO',
+      motivo: 'Comentário ofensivo e fora de contexto',
       status: 'PENDENTE',
+      medida: null,
+      historicoResponsavel: null,
       criadoEm: '2026-01-03T00:00:00Z',
       analisadoEm: null,
     });
 
     renderPagina();
 
-    const botaoDenunciar = await screen.findByRole('button', { name: /denunciar/i });
+    const botaoDenunciar = await screen.findByRole('button', { name: /denunciar avaliação/i });
     await userEvent.click(botaoDenunciar);
 
-    const textarea = await screen.findByPlaceholderText(/abusiva ou indevida/i);
-    await userEvent.type(textarea, 'Comentário ofensivo');
+    await screen.findByRole('dialog');
+    await userEvent.type(screen.getByRole('textbox'), 'Comentário ofensivo e fora de contexto');
     await userEvent.click(screen.getByRole('button', { name: /enviar denúncia/i }));
 
     await waitFor(() =>
-      expect(denunciaService.denunciarAvaliacao).toHaveBeenCalledWith('aval-1', 'Comentário ofensivo'),
+      expect(denunciaService.denunciarAvaliacao).toHaveBeenCalledWith('aval-1', {
+        categoria: 'CONTEUDO_OFENSIVO',
+        motivo: 'Comentário ofensivo e fora de contexto',
+      }),
     );
     expect(await screen.findByText(/em análise/i)).toBeInTheDocument();
+  });
+
+  it('permite denunciar o perfil de outra pessoa', async () => {
+    const outro = { ...usuarioBase(), id: 'outro-usuario' };
+    vi.spyOn(useMeuPerfilHook, 'obterMeuPerfilCache').mockResolvedValue(
+      { ...usuarioBase(), id: 'eu-mesmo' } as never,
+    );
+    vi.spyOn(usuarioService, 'buscarUsuarioPorId').mockResolvedValue(outro);
+    vi.spyOn(projetoService, 'listarProjetos').mockResolvedValue({
+      content: [], totalElements: 0, totalPages: 1, number: 0, size: 50, last: true,
+    });
+    vi.spyOn(avaliacaoService, 'listarAvaliacoesRecebidas').mockResolvedValue({
+      content: [], totalElements: 0, totalPages: 1, number: 0, size: 50, last: true,
+    });
+
+    renderPagina();
+
+    await userEvent.click(await screen.findByRole('button', { name: /denunciar perfil/i }));
+    await screen.findByRole('dialog');
+    await userEvent.type(screen.getByRole('textbox'), 'Perfil usado para aplicar golpe');
+    await userEvent.click(screen.getByRole('button', { name: /enviar denúncia/i }));
+
+    await waitFor(() =>
+      expect(denunciaService.denunciarPerfil).toHaveBeenCalledWith('user-1', {
+        categoria: 'CONTEUDO_OFENSIVO',
+        motivo: 'Perfil usado para aplicar golpe',
+      }),
+    );
+  });
+
+  it('mostra o erro do backend ao denunciar o mesmo perfil de novo', async () => {
+    const outro = { ...usuarioBase(), id: 'outro-usuario' };
+    vi.spyOn(useMeuPerfilHook, 'obterMeuPerfilCache').mockResolvedValue(
+      { ...usuarioBase(), id: 'eu-mesmo' } as never,
+    );
+    vi.spyOn(usuarioService, 'buscarUsuarioPorId').mockResolvedValue(outro);
+    vi.spyOn(projetoService, 'listarProjetos').mockResolvedValue({
+      content: [], totalElements: 0, totalPages: 1, number: 0, size: 50, last: true,
+    });
+    vi.spyOn(avaliacaoService, 'listarAvaliacoesRecebidas').mockResolvedValue({
+      content: [], totalElements: 0, totalPages: 1, number: 0, size: 50, last: true,
+    });
+    // É o 409 que o backend devolve na segunda denúncia ao mesmo alvo.
+    vi.mocked(denunciaService.denunciarPerfil).mockRejectedValue(
+      new ApiError(400, 'Você já denunciou este perfil.'),
+    );
+
+    renderPagina();
+
+    await userEvent.click(await screen.findByRole('button', { name: /denunciar perfil/i }));
+    await screen.findByRole('dialog');
+    await userEvent.type(screen.getByRole('textbox'), 'Perfil usado para aplicar golpe');
+    await userEvent.click(screen.getByRole('button', { name: /enviar denúncia/i }));
+
+    // A mensagem precisa aparecer DENTRO do modal, que continua aberto —
+    // era exatamente isso que faltava: o erro era guardado e nunca exibido.
+    const alerta = await screen.findByRole('alert');
+    expect(alerta).toHaveTextContent('Você já denunciou este perfil.');
+    expect(screen.getByRole('dialog')).toContainElement(alerta);
   });
 });

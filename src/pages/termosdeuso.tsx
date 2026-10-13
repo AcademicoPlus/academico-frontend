@@ -67,8 +67,7 @@ export default function TermosDeUso() {
               <li>Fica visível no perfil público da pessoa avaliada;</li>
               <li>
                 Pode ser <strong>denunciada</strong> pela pessoa avaliada, caso considere o conteúdo
-                abusivo, falso ou não relacionado à colaboração — a denúncia é analisada pela
-                administração da Plataforma, que pode remover a avaliação se considerá-la procedente.
+                abusivo, falso ou não relacionado à colaboração (ver seção 6).
               </li>
             </ul>
             <p>
@@ -88,7 +87,50 @@ export default function TermosDeUso() {
           </section>
 
           <section>
-            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">6. Natureza do projeto</h2>
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">6. Denúncias e medidas de moderação</h2>
+            <p className="mb-2">
+              Você pode <strong>denunciar</strong> uma avaliação recebida, um projeto ou o perfil de
+              outro usuário quando o conteúdo for abusivo, falso, enganoso, caracterizar spam ou
+              tentativa de golpe, ou violar estes Termos. A denúncia exige que você indique um motivo
+              e descreva o que aconteceu, e é analisada pela administração da Plataforma.
+            </p>
+            <p className="mb-2">
+              Ao julgar uma denúncia procedente, a administração escolhe uma destas medidas, da mais
+              branda à mais severa:
+            </p>
+            <ol className="list-decimal pl-5 flex flex-col gap-1 mb-2">
+              <li>
+                <strong>Remoção do conteúdo</strong> — a avaliação ou o projeto denunciado sai do ar,
+                sem punição ao autor;
+              </li>
+              <li>
+                <strong>Advertência</strong> — o conteúdo sai do ar e o responsável recebe um registro
+                formal, exibido para ele no login seguinte, com a justificativa da decisão;
+              </li>
+              <li>
+                <strong>Suspensão</strong> — o conteúdo sai do ar e o acesso do responsável fica
+                bloqueado por um prazo determinado, informado a ele junto com o motivo.
+              </li>
+            </ol>
+            <p className="mb-2">
+              A regra geral é começar pela advertência e só suspender em caso de reincidência ou de
+              violação grave. A decisão é sempre de uma pessoa da administração, nunca automática, e
+              leva em conta o histórico de medidas já aplicadas. Denúncias consideradas improcedentes
+              são arquivadas, e o conteúdo permanece como estava.
+            </p>
+            <p className="mb-2">
+              Quem denuncia não é informado da decisão individual tomada sobre o alvo, para preservar
+              a privacidade das partes. O conteúdo denunciado permanece no ar enquanto a denúncia está
+              em análise.
+            </p>
+            <p>
+              Denúncias e medidas ficam registradas para fins de auditoria, inclusive depois de
+              cumpridas, mesmo quando o conteúdo denunciado já tiver sido removido.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">7. Natureza do projeto</h2>
             <p>
               A Academico+ é um projeto acadêmico em desenvolvimento (MVP). Funcionalidades podem
               mudar, e a disponibilidade do serviço não é garantida.
@@ -96,7 +138,7 @@ export default function TermosDeUso() {
           </section>
 
           <section>
-            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">7. Alterações nestes Termos</h2>
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">8. Alterações nestes Termos</h2>
             <p>
               Podemos atualizar estes Termos conforme a Plataforma evolui. Mudanças relevantes serão
               comunicadas na própria Plataforma.
@@ -104,7 +146,7 @@ export default function TermosDeUso() {
           </section>
 
           <section>
-            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">8. Contato</h2>
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">9. Contato</h2>
             <p>
               Dúvidas sobre estes Termos podem ser encaminhadas à equipe responsável pelo projeto,
               através dos canais informados no README do projeto.

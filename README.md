@@ -1,6 +1,6 @@
 # Academico+ — Frontend
 
-SPA em React + TypeScript + Vite que consome a API do `academico-backend`. Ver o
+SPA em React + TypeScript + Vite que consome a API do `academico-api`. Ver o
 [README raiz](../README.md) para a visão geral do projeto e
 [docs/CONECTANDO_FRONT_BACKEND.md](../docs/CONECTANDO_FRONT_BACKEND.md) para o guia de como as
 telas falam com o backend (camadas, padrão de tela nova, modo de mocks).
@@ -28,7 +28,7 @@ npm run dev
 | `npm run lint` | ESLint |
 | `npm run preview` | Serve o build de produção localmente, pra conferir antes de deployar |
 
-Dá pra rodar as telas sem o `academico-backend` de pé, com dados fictícios: defina
+Dá pra rodar as telas sem o `academico-api` de pé, com dados fictícios: defina
 `VITE_USE_MOCKS=true` no `.env` e reinicie o `npm run dev` (Vite só lê o `.env` na subida).
 Detalhes de como o modo mock funciona e como adicionar uma rota nova nele estão em
 `docs/CONECTANDO_FRONT_BACKEND.md`, seção 6.

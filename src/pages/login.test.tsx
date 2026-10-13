@@ -30,6 +30,7 @@ describe('Login', () => {
         totalAvaliacoes: null,
       },
       avisosCancelamento: [],
+      avisosModeracao: [],
     });
 
     render(
@@ -38,7 +39,7 @@ describe('Login', () => {
       </MemoryRouter>,
     );
 
-    await userEvent.type(screen.getByPlaceholderText('ana.silva@academico.edu.br'), 'ana@academico.edu.br');
+    await userEvent.type(screen.getByPlaceholderText('E-mail'), 'ana@academico.edu.br');
     await userEvent.type(screen.getByPlaceholderText('········'), 'senha123');
     await userEvent.click(screen.getByRole('button', { name: /entrar na plataforma/i }));
 
@@ -64,6 +65,7 @@ describe('Login', () => {
         totalAvaliacoes: null,
       },
       avisosCancelamento: [],
+      avisosModeracao: [],
     });
 
     render(
@@ -72,7 +74,7 @@ describe('Login', () => {
       </MemoryRouter>,
     );
 
-    await userEvent.type(screen.getByPlaceholderText('ana.silva@academico.edu.br'), 'ana@academico.edu.br');
+    await userEvent.type(screen.getByPlaceholderText('E-mail'), 'ana@academico.edu.br');
     await userEvent.type(screen.getByPlaceholderText('········'), 'senhaerrada');
     await userEvent.click(screen.getByRole('button', { name: /entrar na plataforma/i }));
 

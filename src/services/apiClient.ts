@@ -1,5 +1,5 @@
 // Client HTTP central do frontend. Toda comunicação com o backend Spring Boot
-// (academico-backend) passa por aqui, para não espalhar `fetch` cru pelas telas
+// (academico-api) passa por aqui, para não espalhar `fetch` cru pelas telas
 // e para tratar erros sempre do mesmo jeito (formato do GlobalExceptionHandler
 // do backend: { status, erro, mensagem, path, timestamp, erros? }).
 import { obterToken } from '../utils/auth';
@@ -14,7 +14,7 @@ const BASE_URL = import.meta.env.VITE_API_URL as string;
 
 // Quando "true" no .env, todo apiFetch responde com dados fictícios
 // (services/mocks.ts) em vez de chamar o backend real — dá pra desenvolver
-// e testar as telas sem precisar subir o academico-backend nem o banco.
+// e testar as telas sem precisar subir o academico-api nem o banco.
 // Veja docs/CONECTANDO_FRONT_BACKEND.md, seção "Testando sem o backend".
 const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
 

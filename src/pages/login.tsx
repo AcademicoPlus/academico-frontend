@@ -4,6 +4,8 @@ import logo from '../assets/logo.png'
 import { login } from '../services/authService';
 import { salvarToken } from '../utils/auth';
 import { ApiError } from '../services/apiClient';
+import type { Sancao } from '../services/denunciaService';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -13,6 +15,10 @@ export default function Login() {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  // Advertências que o backend entrega uma só vez neste login: seguramos a
+  // navegação até o usuário dar ciência, senão a sanção passaria despercebida
+  // e o backend já a marcou como vista.
+  const [avisosModeracao, setAvisosModeracao] = useState<Sancao[]>([]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -34,6 +40,12 @@ export default function Login() {
       }
 
       salvarToken(resposta.token);
+
+      if (resposta.avisosModeracao?.length) {
+        setAvisosModeracao(resposta.avisosModeracao);
+        return;
+      }
+
       navigate('/dashboard');
     } catch (erroCapturado) {
       // ApiError vem do apiClient com a mensagem que o backend retornou
@@ -178,6 +190,37 @@ export default function Login() {
 
         </div>
       </div>
+
+      {avisosModeracao.length > 0 && (
+        <ConfirmModal
+          titulo={avisosModeracao.length > 1 ? 'Avisos da moderação' : 'Aviso da moderação'}
+          variante="perigo"
+          textoConfirmar="Entendi"
+          textoCancelar="Fechar"
+          onConfirmar={() => navigate('/dashboard')}
+          onCancelar={() => navigate('/dashboard')}
+        >
+          <div className="flex flex-col gap-3">
+            {avisosModeracao.map((aviso) => (
+              <div
+                key={aviso.id}
+                className="rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 p-3.5"
+              >
+                <p className="text-sm font-bold text-red-700 dark:text-red-400">
+                  {aviso.medida === 'SUSPENSAO' ? 'Suspensão aplicada' : 'Advertência'}
+                </p>
+                <p className="mt-1 text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+                  {aviso.justificativa}
+                </p>
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  Reincidir pode levar à suspensão do acesso. Veja os
+                  {' '}<Link to="/termos-de-uso" className="underline">Termos de Uso</Link>.
+                </p>
+              </div>
+            ))}
+          </div>
+        </ConfirmModal>
+      )}
     </div>
   )
 }

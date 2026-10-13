@@ -19,8 +19,12 @@ import {
 } from '../services/projetoService';
 import type { NivelHabilidade } from '../services/usuarioHabilidadeService';
 import { listarAvaliacoesRecebidas, type Avaliacao } from '../services/avaliacaoService';
-import { denunciarAvaliacao } from '../services/denunciaService';
-import { ApiError } from '../services/apiClient';
+import {
+  denunciarAvaliacao,
+  denunciarPerfil,
+  type DenunciarPayload,
+} from '../services/denunciaService';
+import DenunciaModal, { mensagemDeErroDeDenuncia } from '../components/DenunciaModal';
 import { formatarData, iniciaisDoNome } from '../utils/projeto';
 
 import Card from '../components/Card';
@@ -111,11 +115,17 @@ export default function Perfil() {
 
   // ── Avaliações recebidas ───────────────────────────────────────────────────
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
-  const [denunciandoId, setDenunciandoId] = useState<string | null>(null);
-  const [motivoDenuncia, setMotivoDenuncia] = useState('');
   const [enviandoDenuncia, setEnviandoDenuncia] = useState(false);
   const [erroDenuncia, setErroDenuncia] = useState<string | null>(null);
   const [avaliacoesDenunciadas, setAvaliacoesDenunciadas] = useState<Set<string>>(new Set());
+
+  // ── Denúncia (avaliação recebida ou o perfil inteiro) ─────────────────────
+  // Um alvo só, porque o modal é o mesmo: guardar dois estados paralelos
+  // abriria espaço para os dois abertos ao mesmo tempo.
+  const [alvoDenuncia, setAlvoDenuncia] = useState<
+    { tipo: 'AVALIACAO'; avaliacaoId: string } | { tipo: 'PERFIL' } | null
+  >(null);
+  const [perfilDenunciado, setPerfilDenunciado] = useState(false);
 
   useEffect(() => {
     let ativo = true;
@@ -205,29 +215,30 @@ export default function Perfil() {
     };
   }, [id]);
 
-  // ── Handlers de denúncia de avaliação ─────────────────────────────────────
+  // ── Handlers de denúncia ──────────────────────────────────────────────────
 
-  function handleAbrirDenuncia(avaliacaoId: string) {
-    setDenunciandoId(avaliacaoId);
-    setMotivoDenuncia('');
+  function handleAbrirDenuncia(alvo: { tipo: 'AVALIACAO'; avaliacaoId: string } | { tipo: 'PERFIL' }) {
+    setAlvoDenuncia(alvo);
     setErroDenuncia(null);
   }
 
-  async function handleEnviarDenuncia() {
-    if (!denunciandoId) return;
-    if (!motivoDenuncia.trim()) {
-      setErroDenuncia('Explique o motivo da denúncia.');
-      return;
-    }
+  async function handleEnviarDenuncia(dados: DenunciarPayload) {
+    if (!alvoDenuncia) return;
 
     setEnviandoDenuncia(true);
     setErroDenuncia(null);
     try {
-      await denunciarAvaliacao(denunciandoId, motivoDenuncia.trim());
-      setAvaliacoesDenunciadas((prev) => new Set(prev).add(denunciandoId));
-      setDenunciandoId(null);
+      if (alvoDenuncia.tipo === 'AVALIACAO') {
+        await denunciarAvaliacao(alvoDenuncia.avaliacaoId, dados);
+        setAvaliacoesDenunciadas((prev) => new Set(prev).add(alvoDenuncia.avaliacaoId));
+      } else {
+        if (!id) return;
+        await denunciarPerfil(id, dados);
+        setPerfilDenunciado(true);
+      }
+      setAlvoDenuncia(null);
     } catch (e) {
-      setErroDenuncia(e instanceof ApiError ? e.message : 'Não foi possível enviar a denúncia.');
+      setErroDenuncia(mensagemDeErroDeDenuncia(e));
     } finally {
       setEnviandoDenuncia(false);
     }
@@ -330,6 +341,26 @@ export default function Perfil() {
                 </div>
               )}
             </div>
+
+            {/* Denunciar este perfil — só faz sentido no perfil de outra pessoa */}
+            {!isDono && (
+              perfilDenunciado ? (
+                <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                  Denúncia enviada — em análise.
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleAbrirDenuncia({ tipo: 'PERFIL' })}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clipRule="evenodd" />
+                  </svg>
+                  <span>Denunciar perfil</span>
+                </button>
+              )
+            )}
 
             {/* Ações: Editar Perfil e Redes Sociais (visíveis apenas para o dono do perfil) */}
             {isDono && (
@@ -511,7 +542,6 @@ export default function Perfil() {
           <div className="flex flex-col gap-4">
             {avaliacoes.map((av) => {
               const jaDenunciada = avaliacoesDenunciadas.has(av.id);
-              const denunciandoEsta = denunciandoId === av.id;
 
               return (
                 <div
@@ -563,41 +593,10 @@ export default function Perfil() {
                       <p className="self-end text-xs font-medium text-amber-600 dark:text-amber-400">
                         Denúncia enviada — em análise.
                       </p>
-                    ) : denunciandoEsta ? (
-                      <div className="flex flex-col gap-2.5 pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
-                        {erroDenuncia && (
-                          <p role="alert" className="text-xs font-medium text-red-500 dark:text-red-400">{erroDenuncia}</p>
-                        )}
-                        <textarea
-                          value={motivoDenuncia}
-                          onChange={(e) => setMotivoDenuncia(e.target.value)}
-                          placeholder="Explique por que essa avaliação é abusiva ou indevida..."
-                          rows={2}
-                          className="w-full rounded-xl border border-gray-200/90 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-xs text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400 transition-colors resize-none"
-                        />
-                        <div className="flex gap-2 justify-end">
-                          <button
-                            type="button"
-                            onClick={() => setDenunciandoId(null)}
-                            disabled={enviandoDenuncia}
-                            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 cursor-pointer"
-                          >
-                            Cancelar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleEnviarDenuncia}
-                            disabled={enviandoDenuncia}
-                            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
-                          >
-                            {enviandoDenuncia ? 'Enviando…' : 'Enviar denúncia'}
-                          </button>
-                        </div>
-                      </div>
                     ) : (
                       <button
                         type="button"
-                        onClick={() => handleAbrirDenuncia(av.id)}
+                        onClick={() => handleAbrirDenuncia({ tipo: 'AVALIACAO', avaliacaoId: av.id })}
                         className="self-end text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer flex items-center gap-1"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -661,6 +660,21 @@ export default function Perfil() {
           </Card>
         )}
       </div>
+
+      {alvoDenuncia && (
+        <DenunciaModal
+          titulo={alvoDenuncia.tipo === 'PERFIL' ? 'Denunciar perfil' : 'Denunciar avaliação'}
+          descricaoAlvo={
+            alvoDenuncia.tipo === 'PERFIL'
+              ? `o perfil de ${usuario.nome}`
+              : 'esta avaliação'
+          }
+          enviando={enviandoDenuncia}
+          erroEnvio={erroDenuncia}
+          onEnviar={handleEnviarDenuncia}
+          onCancelar={() => setAlvoDenuncia(null)}
+        />
+      )}
 
     </div>
   );

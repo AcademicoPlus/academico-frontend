@@ -1,6 +1,6 @@
 // Dados fictícios usados no lugar do backend real quando VITE_USE_MOCKS=true
 // (ver apiClient.ts). Objetivo: quem está no frontend consegue rodar
-// `npm run dev` e testar as telas sem precisar subir o academico-backend
+// `npm run dev` e testar as telas sem precisar subir o academico-api
 // nem o banco. Veja docs/CONECTANDO_FRONT_BACKEND.md, seção "Testando sem
 // o backend".
 //
@@ -133,14 +133,57 @@ const USUARIOS_ADMIN_MOCK: UsuarioResumo[] = [USUARIO_LOGADO_MOCK, LUCAS_MENDES_
 const DENUNCIAS_MOCK: Denuncia[] = [
   {
     id: 'denuncia-mock-1',
-    avaliacaoId: 'avaliacao-mock-1',
-    avaliador: LUCAS_MENDES_MOCK,
-    notaAvaliacao: 1,
-    comentarioAvaliacao: 'Não entregou nada e ainda me xingou no grupo do projeto.',
+    tipoAlvo: 'AVALIACAO',
+    alvo: {
+      id: 'avaliacao-mock-1',
+      titulo: `Avaliação de ${LUCAS_MENDES_MOCK.nome}`,
+      conteudo: 'Não entregou nada e ainda me xingou no grupo do projeto.',
+      nota: 1,
+      autor: LUCAS_MENDES_MOCK,
+    },
+    responsavel: LUCAS_MENDES_MOCK,
     denunciante: MARIA_COSTA_MOCK,
+    categoria: 'CONTEUDO_OFENSIVO',
     motivo: 'Avaliação com linguagem ofensiva e sem relação com o desempenho no projeto.',
     status: 'PENDENTE',
+    medida: null,
+    historicoResponsavel: {
+      advertencias: 0,
+      suspensoes: 0,
+      suspensoAgora: false,
+      suspensoAte: null,
+      medidaSugerida: 'ADVERTENCIA',
+      justificativaSugestao: 'Sem histórico de sanções: a escada recomenda começar pela advertência.',
+    },
     criadoEm: '2024-04-01T10:00:00Z',
+    analisadoEm: null,
+  },
+  // Reincidente: a fila deve sugerir suspensão em vez de advertência.
+  {
+    id: 'denuncia-mock-2',
+    tipoAlvo: 'PERFIL',
+    alvo: {
+      id: MARIA_COSTA_MOCK.id,
+      titulo: MARIA_COSTA_MOCK.nome,
+      conteudo: 'Vendo trabalhos acadêmicos prontos, chame no particular.',
+      nota: null,
+      autor: MARIA_COSTA_MOCK,
+    },
+    responsavel: MARIA_COSTA_MOCK,
+    denunciante: LUCAS_MENDES_MOCK,
+    categoria: 'GOLPE',
+    motivo: 'Perfil usado para vender trabalhos prontos, o que fere os termos de uso.',
+    status: 'PENDENTE',
+    medida: null,
+    historicoResponsavel: {
+      advertencias: 2,
+      suspensoes: 0,
+      suspensoAgora: false,
+      suspensoAte: null,
+      medidaSugerida: 'SUSPENSAO',
+      justificativaSugestao: 'Já acumula 2 advertência(s): a escada recomenda suspender por 7 dias.',
+    },
+    criadoEm: '2024-04-03T10:00:00Z',
     analisadoEm: null,
   },
 ];
@@ -738,8 +781,13 @@ export function mockFetch<TResposta>(caminho: string, { method, body }: MockOpti
     case 'GET /niveis-acesso':
       return resolverComAtraso(NIVEIS_ACESSO_MOCK as unknown as TResposta);
 
-    case 'GET /denuncias':
-      return resolverComAtraso(paginar(clonar(DENUNCIAS_MOCK)) as unknown as TResposta);
+    case 'GET /denuncias': {
+      const tipoAlvo = parametros.get('tipoAlvo');
+      const filtradas = tipoAlvo
+        ? DENUNCIAS_MOCK.filter((d) => d.tipoAlvo === tipoAlvo)
+        : DENUNCIAS_MOCK;
+      return resolverComAtraso(paginar(clonar(filtradas)) as unknown as TResposta);
+    }
 
     case 'GET /usuarios/me':
       return resolverComAtraso({ ...meuPerfilMock } as unknown as TResposta);
@@ -886,6 +934,7 @@ export function mockFetch<TResposta>(caminho: string, { method, body }: MockOpti
           token: 'token-mock-dev',
           usuario: USUARIO_LOGADO_MOCK,
           avisosCancelamento: [],
+          avisosModeracao: [],
         };
         return resolverComAtraso(resposta as unknown as TResposta);
       }
@@ -1192,8 +1241,9 @@ export function mockFetch<TResposta>(caminho: string, { method, body }: MockOpti
         if (!denuncia) {
           return rejeitarComAtraso(new ApiError(404, 'Denúncia não encontrada.'));
         }
-        const procedente = parametros.get('procedente') === 'true';
-        denuncia.status = procedente ? 'PROCEDENTE' : 'IMPROCEDENTE';
+        const { medida } = body as { medida: Denuncia['medida'] };
+        denuncia.medida = medida ?? null;
+        denuncia.status = medida === 'ARQUIVAR' ? 'IMPROCEDENTE' : 'PROCEDENTE';
         denuncia.analisadoEm = new Date().toISOString();
         const indice = DENUNCIAS_MOCK.indexOf(denuncia);
         DENUNCIAS_MOCK.splice(indice, 1);

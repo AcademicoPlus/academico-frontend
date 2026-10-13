@@ -1,7 +1,8 @@
 // Chamadas para o AuthController do backend (rotas /auth/*).
-// Os tipos abaixo espelham os records Java em academico-backend
+// Os tipos abaixo espelham os records Java em academico-api
 // (dto/auth/LoginRequest, LoginResponse, CadastroRequest, CadastroResponse).
 import { apiFetch } from './apiClient';
+import type { Sancao } from './denunciaService';
 
 export type LoginRequest = {
   email: string;
@@ -27,6 +28,11 @@ export type LoginResponse = {
   // Avisos de projetos cancelados exibidos ao usuário após o login;
   // não é usado pelo formulário de login em si, então fica tipado de forma solta.
   avisosCancelamento: unknown[];
+  // Advertências da moderação ainda não vistas. O backend as entrega uma
+  // única vez, no primeiro login após a decisão do admin (e as marca como
+  // vistas no mesmo gesto), então a tela de login precisa exibi-las agora —
+  // não há segunda chance de mostrar.
+  avisosModeracao: Sancao[];
 };
 
 export type CadastroRequest = {
