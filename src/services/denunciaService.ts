@@ -2,7 +2,7 @@
 // projeto e perfil, e a fila de moderação com a escada de sanções
 // (rotas /denuncias, /avaliacoes|projetos|usuarios/{id}/denuncias).
 // Listar pendentes e resolver são só ADMIN (@PreAuthorize no backend).
-import { apiFetch, construirQuery, type PaginaResposta } from './apiClient';
+import { ApiError, apiFetch, construirQuery, type PaginaResposta } from './apiClient';
 import type { UsuarioResumo } from './authService';
 
 // Espelham os enums do backend (domain/enums/).
@@ -159,4 +159,16 @@ export function resolverDenuncia(id: string, dados: ResolverPayload): Promise<De
     method: 'PATCH',
     body: dados,
   });
+}
+
+/**
+ * Mensagem de erro de uma denúncia que falhou, com fallback padronizado.
+ *
+ * Mora aqui, e não junto do DenunciaModal, porque um módulo que exporta um
+ * componente React não pode exportar mais nada sem quebrar o Fast Refresh
+ * (regra react-refresh/only-export-components) — e o lugar natural para
+ * traduzir o erro destas chamadas é o próprio módulo que as faz.
+ */
+export function mensagemDeErroDeDenuncia(e: unknown): string {
+  return e instanceof ApiError ? e.message : 'Não foi possível enviar a denúncia.';
 }

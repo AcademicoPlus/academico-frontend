@@ -23,8 +23,9 @@ import {
   denunciarAvaliacao,
   denunciarPerfil,
   type DenunciarPayload,
+  mensagemDeErroDeDenuncia,
 } from '../services/denunciaService';
-import DenunciaModal, { mensagemDeErroDeDenuncia } from '../components/DenunciaModal';
+import DenunciaModal from '../components/DenunciaModal';
 import { formatarData, iniciaisDoNome } from '../utils/projeto';
 
 import Card from '../components/Card';

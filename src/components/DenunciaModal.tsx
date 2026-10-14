@@ -5,7 +5,6 @@
 import { useState } from 'react';
 
 import ConfirmModal from './ConfirmModal';
-import { ApiError } from '../services/apiClient';
 import {
   CATEGORIAS_DENUNCIA,
   type CategoriaDenuncia,
@@ -140,9 +139,4 @@ export default function DenunciaModal({
       </div>
     </ConfirmModal>
   );
-}
-
-/** Mensagem de erro de uma denúncia que falhou, com fallback padronizado. */
-export function mensagemDeErroDeDenuncia(e: unknown): string {
-  return e instanceof ApiError ? e.message : 'Não foi possível enviar a denúncia.';
 }

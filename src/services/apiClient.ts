@@ -2,7 +2,7 @@
 // (academico-api) passa por aqui, para não espalhar `fetch` cru pelas telas
 // e para tratar erros sempre do mesmo jeito (formato do GlobalExceptionHandler
 // do backend: { status, erro, mensagem, path, timestamp, erros? }).
-import { obterToken } from '../utils/auth';
+import { obterToken, removerToken } from '../utils/auth';
 import { ApiError, type ErroCampo } from './apiError';
 import { mockFetch } from './mocks';
 
@@ -71,6 +71,16 @@ export async function apiFetch<TResposta>(
   const dados = resposta.status === 204 ? null : await resposta.json();
 
   if (!resposta.ok) {
+    // Token vencido ou inválido: descarta a sessão e manda para o login. Sem
+    // isso o usuário continuava "logado" (o guard de rota só via o token no
+    // localStorage) e cada tela quebrava com um erro genérico — como não há
+    // refresh token, isso acontecia com todo mundo quando o token de 24h
+    // vencia. Ainda assim lança o ApiError abaixo, para quem chamou não ficar
+    // esperando uma resposta que não vem.
+    if (resposta.status === 401 && autenticado) {
+      encerrarSessaoExpirada();
+    }
+
     const erro = dados as ErroResposta;
     throw new ApiError(
       resposta.status,
@@ -80,6 +90,16 @@ export async function apiFetch<TResposta>(
   }
 
   return dados as TResposta;
+}
+
+// Redirect "duro" (e não navigate do react-router) de propósito: apiFetch é
+// chamado de fora da árvore de componentes também, e recarregar a página
+// garante que nenhum estado da sessão antiga sobreviva em cache de memória.
+function encerrarSessaoExpirada(): void {
+  removerToken();
+  if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+    window.location.replace('/login');
+  }
 }
 
 // GET /projetos, /candidaturas, /habilidades etc. devolvem uma Page do

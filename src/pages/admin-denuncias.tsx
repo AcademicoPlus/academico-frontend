@@ -71,6 +71,7 @@ export default function AdminDenuncias() {
       .finally(() => setCarregando(false));
   }, [filtro]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- reseta o loading ao trocar o filtro, antes do fetch em carregar()
   useEffect(carregar, [carregar]);
 
   function abrirJulgamento(denuncia: Denuncia) {
