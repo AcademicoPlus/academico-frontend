@@ -37,11 +37,16 @@ function rejeitarComAtraso<T>(erro: ApiError): Promise<T> {
 }
 
 const CURSOS_MOCK: Curso[] = [
-  { id: '11111111-1111-1111-1111-111111111111', nome: 'Ciência da Computação', criadoEm: '2024-01-01T00:00:00Z' },
-  { id: '22222222-2222-2222-2222-222222222222', nome: 'Engenharia de Software', criadoEm: '2024-01-01T00:00:00Z' },
-  { id: '33333333-3333-3333-3333-333333333333', nome: 'Design Gráfico', criadoEm: '2024-01-01T00:00:00Z' },
-  { id: '44444444-4444-4444-4444-444444444444', nome: 'Administração', criadoEm: '2024-01-01T00:00:00Z' },
-  { id: '55555555-5555-5555-5555-555555555555', nome: 'Psicologia', criadoEm: '2024-01-01T00:00:00Z' },
+  ...[
+    'Ciências da Computação', 'Farmácia', 'Enfermagem', 'Psicologia', 'Fisioterapia',
+    'Administração', 'Biomedicina', 'Direito', 'Engenharia Civil', 'Pedagogia',
+    'Educação Física', 'Ciências Contábeis', 'Serviço Social', 'Recursos Humanos',
+    'Segurança do Trabalho', 'Tecnologia da Informação',
+  ].map((nome, i) => ({
+    id: `00000000-0000-0000-0000-${String(i + 1).padStart(12, '0')}`,
+    nome,
+    criadoEm: '2024-01-01T00:00:00Z',
+  })),
 ];
 
 // Catálogo único de habilidades, no mesmo formato do endpoint real
@@ -94,7 +99,7 @@ const NIVEIS_ACESSO_MOCK: NivelAcesso[] = [
 const USUARIO_LOGADO_MOCK: UsuarioResumo = {
   id: 'usuario-mock-1',
   nome: 'Ana Silva',
-  curso: 'Ciência da Computação',
+  curso: 'Ciências da Computação',
   fotoUrl: null,
   permission: 'ADMIN',
   periodo: 4,
@@ -105,7 +110,7 @@ const USUARIO_LOGADO_MOCK: UsuarioResumo = {
 const LUCAS_MENDES_MOCK: UsuarioResumo = {
   id: 'usuario-mock-2',
   nome: 'Lucas Mendes',
-  curso: 'Ciência da Computação',
+  curso: 'Ciências da Computação',
   fotoUrl: null,
   permission: 'ALUNO',
   periodo: 6,
@@ -221,12 +226,12 @@ type UsuarioMock = UsuarioResumo & { habilidades: Habilidade[] };
 // habilidades variados de propósito, para testar busca, filtro por curso
 // e filtro por habilidade com resultados diferentes.
 const USUARIOS_MOCK: UsuarioMock[] = [
-  { id: 'usuario-mock-2', nome: 'Bruno Alves', curso: 'Ciência da Computação', fotoUrl: null, permission: 'ALUNO', periodo: 6, notaMedia: 4.8, totalAvaliacoes: 5, habilidades: [acha('hab-java'), acha('hab-spring'), acha('hab-react'), acha('hab-docker')] },
-  { id: 'usuario-mock-3', nome: 'Carla Mendes', curso: 'Design Gráfico', fotoUrl: null, permission: 'ALUNO', periodo: 3, notaMedia: 4.2, totalAvaliacoes: 2, habilidades: [acha('hab-marketing'), acha('hab-branding'), acha('hab-seo'), acha('hab-ads')] },
-  { id: 'usuario-mock-4', nome: 'Diego Santos', curso: 'Engenharia de Software', fotoUrl: null, permission: 'ALUNO', periodo: 5, notaMedia: 4.6, totalAvaliacoes: 8, habilidades: [acha('hab-reactnative'), acha('hab-ts'), acha('hab-node'), acha('hab-aws')] },
+  { id: 'usuario-mock-2', nome: 'Bruno Alves', curso: 'Ciências da Computação', fotoUrl: null, permission: 'ALUNO', periodo: 6, notaMedia: 4.8, totalAvaliacoes: 5, habilidades: [acha('hab-java'), acha('hab-spring'), acha('hab-react'), acha('hab-docker')] },
+  { id: 'usuario-mock-3', nome: 'Carla Mendes', curso: 'Tecnologia da Informação', fotoUrl: null, permission: 'ALUNO', periodo: 3, notaMedia: 4.2, totalAvaliacoes: 2, habilidades: [acha('hab-marketing'), acha('hab-branding'), acha('hab-seo'), acha('hab-ads')] },
+  { id: 'usuario-mock-4', nome: 'Diego Santos', curso: 'Ciências da Computação', fotoUrl: null, permission: 'ALUNO', periodo: 5, notaMedia: 4.6, totalAvaliacoes: 8, habilidades: [acha('hab-reactnative'), acha('hab-ts'), acha('hab-node'), acha('hab-aws')] },
   { id: 'usuario-mock-5', nome: 'Eduarda Lima', curso: 'Psicologia', fotoUrl: null, permission: 'ALUNO', periodo: 2, notaMedia: 4.9, totalAvaliacoes: 1, habilidades: [acha('hab-psico'), acha('hab-pesquisa'), acha('hab-uxr')] },
   { id: 'usuario-mock-6', nome: 'Felipe Rocha', curso: 'Administração', fotoUrl: null, permission: 'PROFESSOR', periodo: null, notaMedia: null, totalAvaliacoes: null, habilidades: [acha('hab-uiux'), acha('hab-pesquisa')] },
-  { id: 'usuario-mock-7', nome: 'Giovana Ribeiro', curso: 'Ciência da Computação', fotoUrl: null, permission: 'ALUNO', periodo: 8, notaMedia: 4.7, totalAvaliacoes: 6, habilidades: [acha('hab-java'), acha('hab-react')] },
+  { id: 'usuario-mock-7', nome: 'Giovana Ribeiro', curso: 'Ciências da Computação', fotoUrl: null, permission: 'ALUNO', periodo: 8, notaMedia: 4.7, totalAvaliacoes: 6, habilidades: [acha('hab-java'), acha('hab-react')] },
 ];
 
 // Perfil completo (mutável) do usuário logado nos mocks. GET e PUT
@@ -417,7 +422,7 @@ const AVALIACOES_MOCK: Avaliacao[] = [
     avaliador: {
       id: 'usuario-mock-4',
       nome: 'Rodrigo Farias',
-      curso: 'Engenharia de Software',
+      curso: 'Ciências da Computação',
       fotoUrl: null,
       permission: 'ALUNO',
       periodo: 7,
