@@ -23,6 +23,28 @@ export default function Cadastro() {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
+  // Controle do Tema (Claro/Escuro)
+  const [tema, setTema] = useState<'claro' | 'escuro'>(() => {
+    const temaSalvo = localStorage.getItem('tema');
+    if (temaSalvo) return temaSalvo as 'claro' | 'escuro';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+  });
+
+  // Aplica a classe 'dark' no elemento raiz (HTML) quando o tema mudar
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (tema === 'escuro') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('tema', tema);
+  }, [tema]);
+
+  const alternarTema = () => {
+    setTema((prev) => (prev === 'claro' ? 'escuro' : 'claro'));
+  };
+
   useEffect(() => {
     listarCursos()
       .then(setCursos)
@@ -62,20 +84,37 @@ export default function Cadastro() {
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-[#F8F9FA] dark:bg-slate-950 font-sans">
+    <div className="flex min-h-screen w-full bg-[#F8F9FA] dark:bg-slate-950 font-sans relative">
+
+      {/* Botão de Alternar Tema (Canto Superior Direito) */}
+      <button
+        onClick={alternarTema}
+        className="absolute top-6 right-6 z-20 p-2.5 rounded-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-500 dark:text-gray-400 hover:text-[#F27405] dark:hover:text-[#F27405] shadow-sm transition-all"
+        aria-label="Alternar tema"
+        title={tema === 'claro' ? 'Mudar para tema escuro' : 'Mudar para tema claro'}
+      >
+        {tema === 'claro' ? (
+          // Ícone de Lua
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+          </svg>
+        ) : (
+          // Ícone de Sol
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+          </svg>
+        )}
+      </button>
 
       {/* Lado Esquerdo (Azul Marinho) */}
       <div className="hidden lg:flex w-1/2 bg-[#183E6C] relative flex-col justify-center px-16 xl:px-24 overflow-hidden">
-
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 border-30 border-white/5 rounded-full pointer-events-none"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-137.5 h-137.5 border-30 border-white/5 rounded-full pointer-events-none"></div>
 
         <div className="relative z-10 text-white max-w-lg">
-
           <h1 className="text-4xl xl:text-5xl font-bold mb-6 leading-tight">
             Junte-se à nossa comunidade acadêmica
           </h1>
-
           <p className="text-[#B2C6E0] text-lg mb-16 leading-relaxed max-w-md">
             Crie seu perfil, descubra projetos inovadores e colabore com estudantes e professores de toda a instituição.
           </p>
@@ -96,10 +135,9 @@ export default function Cadastro() {
               <h2 className="text-3xl font-bold text-[#183E6C] dark:text-blue-300">Crie sua conta</h2>
               <p className="text-gray-500 dark:text-gray-300 mt-1">Preencha seus dados institucionais</p>
             </div>
-            
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-slate-700 p-8">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-slate-700 p-8 transition-colors">
 
             {erro && (
               <div className="mb-5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/50 px-4 py-3 text-sm text-red-600 dark:text-red-400">
@@ -119,7 +157,7 @@ export default function Cadastro() {
                   </div>
                   <input
                     type="text"
-                    placeholder="Luana..."
+                    placeholder="Nome completo"
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
                     required
@@ -138,7 +176,7 @@ export default function Cadastro() {
                   </div>
                   <input
                     type="email"
-                    placeholder="luana@academico.edu.br"
+                    placeholder="E-mail institucional"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -233,7 +271,8 @@ export default function Cadastro() {
                   </div>
                 </div>
               </div>
-                            {/* Aceite dos Termos de Uso e Política de Privacidade — obrigatório no backend (CadastroRequest.aceitouTermos) */}
+
+              {/* Aceite dos Termos de Uso e Política de Privacidade */}
               <div className="flex items-start gap-2">
                 <input
                   type="checkbox"

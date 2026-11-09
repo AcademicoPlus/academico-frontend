@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, type FormEvent } from 'react';
-import logo from '../assets/logo.png'
+import { useState, useEffect, type FormEvent } from 'react';
+import logo from '../assets/logo.png';
 import { login } from '../services/authService';
 import { salvarToken } from '../utils/auth';
 import { ApiError } from '../services/apiClient';
@@ -15,10 +15,31 @@ export default function Login() {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [mostrarSenha, setMostrarSenha] = useState(false);
-  // Advertências que o backend entrega uma só vez neste login: seguramos a
-  // navegação até o usuário dar ciência, senão a sanção passaria despercebida
-  // e o backend já a marcou como vista.
+  
+  // Controle do Tema (Claro/Escuro)
+  const [tema, setTema] = useState<'claro' | 'escuro'>(() => {
+    const temaSalvo = localStorage.getItem('tema');
+    if (temaSalvo) return temaSalvo as 'claro' | 'escuro';
+    // Se não tiver salvo, pega a preferência do sistema
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+  });
+
   const [avisosModeracao, setAvisosModeracao] = useState<Sancao[]>([]);
+
+  // Aplica a classe 'dark' no elemento raiz (HTML) quando o tema mudar
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (tema === 'escuro') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('tema', tema);
+  }, [tema]);
+
+  const alternarTema = () => {
+    setTema((prev) => (prev === 'claro' ? 'escuro' : 'claro'));
+  };
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -28,12 +49,6 @@ export default function Login() {
     try {
       const resposta = await login({ email, senha });
 
-      // O backend responde 200 OK mesmo em credenciais inválidas ou conta
-      // desativada (contrato consistente entre as duas falhas de login) — só
-      // o campo "sucesso" indica se realmente autenticou. Sem essa checagem,
-      // "token: null" seria salvo como a string "null" no localStorage e o
-      // app trataria isso como sessão válida, levando pro dashboard sem
-      // token de verdade (todas as chamadas subsequentes voltam 401).
       if (!resposta.sucesso || !resposta.token) {
         setErro(resposta.mensagem);
         return;
@@ -48,8 +63,6 @@ export default function Login() {
 
       navigate('/dashboard');
     } catch (erroCapturado) {
-      // ApiError vem do apiClient com a mensagem que o backend retornou
-      // (ex.: "Email ou senha inválidos"); qualquer outro erro é de rede/CORS.
       const mensagem =
         erroCapturado instanceof ApiError
           ? erroCapturado.message
@@ -61,28 +74,40 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-[#F8F9FA] dark:bg-slate-950 font-sans">
+    <div className="flex min-h-screen w-full bg-[#F8F9FA] dark:bg-slate-950 font-sans relative">
+
+      {/* Botão de Alternar Tema (Canto Superior Direito) */}
+      <button
+        onClick={alternarTema}
+        className="absolute top-6 right-6 z-20 p-2.5 rounded-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-500 dark:text-gray-400 hover:text-[#F27405] dark:hover:text-[#F27405] shadow-sm transition-all"
+        aria-label="Alternar tema"
+        title={tema === 'claro' ? 'Mudar para tema escuro' : 'Mudar para tema claro'}
+      >
+        {tema === 'claro' ? (
+          // Ícone de Lua (Tema Claro -> Clicar muda para Escuro)
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+          </svg>
+        ) : (
+          // Ícone de Sol (Tema Escuro -> Clicar muda para Claro)
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+          </svg>
+        )}
+      </button>
 
       {/* Lado Esquerdo (Azul Marinho) */}
       <div className="hidden lg:flex w-1/2 bg-[#183E6C] relative flex-col justify-center px-16 xl:px-24 overflow-hidden">
-
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 border-30 border-white/5 rounded-full pointer-events-none"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-137.5 h-137.5 border-30 border-white/5 rounded-full pointer-events-none"></div>
 
         <div className="relative z-10 text-white max-w-lg">
-
           <h1 className="text-4xl xl:text-5xl font-bold mb-6 leading-tight">
             Conecte-se com projetos multidisciplinares
           </h1>
-
           <p className="text-[#B2C6E0] text-lg mb-16 leading-relaxed max-w-md">
             Crie projetos, recrute colaboradores por habilidades e faça parte de algo maior com colegas de outros cursos.
           </p>
-
-
-          <div className="flex gap-10">
-
-          </div>
         </div>
       </div>
 
@@ -100,10 +125,9 @@ export default function Login() {
               <h2 className="text-3xl font-bold text-[#183E6C] dark:text-blue-300">Bem-vindo de volta</h2>
               <p className="text-gray-500 dark:text-gray-300 mt-1">Entre na sua conta institucional</p>
             </div>
-
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-slate-700 p-8">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-slate-700 p-8 transition-colors">
 
             {erro && (
               <div className="mb-5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/50 px-4 py-3 text-sm text-red-600 dark:text-red-400">

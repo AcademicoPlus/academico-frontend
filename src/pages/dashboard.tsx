@@ -68,15 +68,15 @@ function mensagemErro(erro: unknown): string {
 const BANNERS = [
   {
     id: 1,
-    imagem: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+    imagem: 'https://media.istockphoto.com/id/2195077042/pt/foto/photo-collage-virtual-online-meeting-web-app-internet-connection-video-call-man-shaking-hands.jpg?s=1024x1024&w=is&k=20&c=KnL2aVN2AgnHl-z5lTEfJCoDRnTYchbbWDye581tL94='
   },
   {
     id: 2,
-    imagem: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+    imagem: 'https://media.istockphoto.com/id/1312418309/pt/foto/visual-contents-concept-social-networking-service-streaming-video-communication-network-3d.jpg?s=1024x1024&w=is&k=20&c=lFjdB2PI0aqTW5cfRSYzKMrnQekLisK0ziE1eTveDsc='
   },
   {
     id: 3,
-    imagem: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+    imagem: 'https://media.istockphoto.com/id/2156086997/pt/vetorial/pop-art-modern-collage-with-screaming-mouth-and-bullhorn.jpg?s=1024x1024&w=is&k=20&c=AfjF-utpdQVzRMu1Z6dCBxgAWz_dq76ktstkHwQNlDw='
   }
 ];
 
