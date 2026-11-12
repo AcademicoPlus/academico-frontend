@@ -5,6 +5,7 @@ import type { MensagemResponse, UsuarioResumo } from './authService';
 import type { Curso } from './cursoService';
 import type { NivelAcesso } from './nivelAcessoService';
 import type { UsuarioHabilidade } from './usuarioHabilidadeService';
+import { salvarToken } from '../utils/auth';
 
 // Espelha UsuarioPerfilResponse (dto/usuario) — perfil completo (usado em
 // "meu perfil" e em "ver perfil de outro usuário").
@@ -49,7 +50,6 @@ export type AtualizarPerfilRequest = {
   idCurso?: string;
   periodo?: number;
   bio?: string;
-  fotoUrl?: string;
   linkedinUrl?: string;
   githubUrl?: string;
 };
@@ -61,14 +61,21 @@ export function atualizarMeuPerfil(dados: AtualizarPerfilRequest): Promise<Usuar
 export type AlterarSenhaResponse = {
   mensagem: string;
   dataAtualizacao: string;
+  // Trocar a senha invalida todos os tokens emitidos antes, inclusive o desta
+  // sessão — o backend devolve um novo, que substitui o salvo.
+  token: string;
 };
 
 // Espelha UsuarioUpdateSenhaRequest (dto/usuario).
-export function alterarMinhaSenha(senhaAtual: string, novaSenha: string): Promise<AlterarSenhaResponse> {
-  return apiFetch<AlterarSenhaResponse>('/usuarios/me/senha', {
+export async function alterarMinhaSenha(senhaAtual: string, novaSenha: string): Promise<AlterarSenhaResponse> {
+  const resposta = await apiFetch<AlterarSenhaResponse>('/usuarios/me/senha', {
     method: 'PATCH',
     body: { senhaAtual, novaSenha },
   });
+  if (resposta.token) {
+    salvarToken(resposta.token);
+  }
+  return resposta;
 }
 
 // Multipart: manda um FormData com o campo "foto" (é o nome esperado pelo
