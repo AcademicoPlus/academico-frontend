@@ -504,6 +504,22 @@ function EditarProjeto({ id }: { id: string }) {
 
   const statusFinal = projeto.status === 'CONCLUIDO' || projeto.status === 'CANCELADO';
 
+  // Concluir/cancelar trava a edição para sempre: com alteração pendente no
+  // formulário, ela se perderia. `projeto` é a última versão salva (o submit
+  // atualiza com a resposta do backend), então a comparação é contra ele.
+  const temAlteracoesNaoSalvas =
+    titulo.trim() !== projeto.titulo.trim()
+    || descricao.trim() !== (projeto.descricao ?? '').trim()
+    || Number(vagas) !== projeto.vagas
+    || dataFim !== (projeto.dataFim ? projeto.dataFim.slice(0, 10) : '');
+
+  const avisoAlteracoesPendentes = temAlteracoesNaoSalvas && (
+    <p role="alert" className="text-sm font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 rounded-lg px-3 py-2">
+      Você tem alterações não salvas no formulário. Salve antes de continuar: depois disso o projeto não
+      pode mais ser editado.
+    </p>
+  );
+
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-6 py-2 pb-16">
       {/* Navegação Superior */}
@@ -916,6 +932,7 @@ function EditarProjeto({ id }: { id: string }) {
               Concluir encerra o projeto e libera as avaliações entre os participantes. Todos os membros
               recebem um aviso para avaliar a equipe. Essa ação não pode ser desfeita.
             </p>
+            {avisoAlteracoesPendentes}
             <div className="flex flex-col-reverse sm:flex-row gap-2.5 justify-end pt-1">
               <button
                 type="button"
@@ -927,7 +944,7 @@ function EditarProjeto({ id }: { id: string }) {
               </button>
               <button
                 type="button"
-                disabled={alterandoStatus}
+                disabled={alterandoStatus || temAlteracoesNaoSalvas}
                 onClick={() => handleMudarStatus('CONCLUIDO')}
                 className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-primary hover:bg-primary/90 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-xs"
               >
@@ -943,6 +960,7 @@ function EditarProjeto({ id }: { id: string }) {
             <p className="text-sm text-red-700 dark:text-red-400 font-medium">
               Cancelar avisa todos os membros do projeto. Essa ação não pode ser desfeita.
             </p>
+            {avisoAlteracoesPendentes}
             <textarea
               placeholder="Motivo do cancelamento (opcional)"
               value={motivoCancelamento}
@@ -961,7 +979,7 @@ function EditarProjeto({ id }: { id: string }) {
               </button>
               <button
                 type="button"
-                disabled={alterandoStatus}
+                disabled={alterandoStatus || temAlteracoesNaoSalvas}
                 onClick={() => handleMudarStatus('CANCELADO', motivoCancelamento.trim() || undefined)}
                 className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-red-600 hover:bg-red-700 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-xs"
               >

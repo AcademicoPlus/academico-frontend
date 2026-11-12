@@ -149,6 +149,51 @@ describe('EditarProjeto', () => {
     await waitFor(() => expect(projetoService.alterarStatusProjeto).toHaveBeenCalledWith('proj-1', 'CONCLUIDO', undefined));
   });
 
+  it('não deixa concluir com alterações não salvas no formulário, e libera depois de salvar', async () => {
+    // Regressão: dava para concluir com o formulário editado; concluir trava a
+    // edição e as alterações se perdiam.
+    vi.spyOn(useMeuPerfilHook, 'obterMeuPerfilCache').mockResolvedValue({ id: 'user-1' } as never);
+    vi.spyOn(projetoService, 'buscarProjetoPorId').mockResolvedValue(projetoBase({ status: 'EM_ANDAMENTO' }));
+    vi.spyOn(projetoService, 'atualizarProjeto').mockResolvedValue(
+      projetoBase({ status: 'EM_ANDAMENTO', titulo: 'Projeto Atualizado' }),
+    );
+    vi.spyOn(projetoService, 'alterarStatusProjeto').mockResolvedValue(projetoBase({ status: 'CONCLUIDO' }));
+
+    renderPagina();
+
+    const campoTitulo = await screen.findByDisplayValue('Projeto Original');
+    await userEvent.clear(campoTitulo);
+    await userEvent.type(campoTitulo, 'Projeto Atualizado');
+
+    await userEvent.click(screen.getByRole('button', { name: /concluído/i }));
+    expect(screen.getByText(/alterações não salvas/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /confirmar conclusão/i })).toBeDisabled();
+
+    await userEvent.click(screen.getByRole('button', { name: /salvar alterações/i }));
+    await waitFor(() => expect(projetoService.atualizarProjeto).toHaveBeenCalled());
+
+    await waitFor(() => expect(screen.getByRole('button', { name: /confirmar conclusão/i })).toBeEnabled());
+    expect(screen.queryByText(/alterações não salvas/i)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /confirmar conclusão/i }));
+    await waitFor(() => expect(projetoService.alterarStatusProjeto).toHaveBeenCalledWith('proj-1', 'CONCLUIDO', undefined));
+  });
+
+  it('também bloqueia cancelar o projeto com alterações não salvas', async () => {
+    vi.spyOn(useMeuPerfilHook, 'obterMeuPerfilCache').mockResolvedValue({ id: 'user-1' } as never);
+    vi.spyOn(projetoService, 'buscarProjetoPorId').mockResolvedValue(projetoBase());
+
+    renderPagina();
+
+    const campoVagas = await screen.findByDisplayValue('3');
+    await userEvent.clear(campoVagas);
+    await userEvent.type(campoVagas, '5');
+
+    await userEvent.click(screen.getByRole('button', { name: /^cancelado/i }));
+
+    expect(screen.getByText(/alterações não salvas/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /confirmar cancelamento/i })).toBeDisabled();
+  });
+
   it('exclui o projeto após confirmação e volta para a lista de projetos', async () => {
     vi.spyOn(useMeuPerfilHook, 'obterMeuPerfilCache').mockResolvedValue({ id: 'user-1' } as never);
     vi.spyOn(projetoService, 'buscarProjetoPorId').mockResolvedValue(projetoBase());

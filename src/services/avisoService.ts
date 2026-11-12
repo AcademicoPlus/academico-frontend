@@ -23,3 +23,11 @@ export function listarAvisosPendentes(): Promise<AvisoProjeto[]> {
 export function marcarAvisoComoVisto(id: string): Promise<void> {
   return apiFetch<void>(`/avisos/${id}/visualizado`, { method: 'PATCH' });
 }
+
+// Mesmo padrão dos convites: o sino do cabeçalho escuta este evento para
+// recontar as notificações depois que um aviso é dispensado.
+export const EVENTO_AVISOS_ATUALIZADOS = 'avisos-atualizados';
+
+export function notificarAvisosAtualizados() {
+  window.dispatchEvent(new Event(EVENTO_AVISOS_ATUALIZADOS));
+}

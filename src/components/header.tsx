@@ -4,26 +4,54 @@ import logoEscura from '../assets/logo-escura.png';
 
 import NotificationDropdown from './NotificationDropdown';
 import { contarConvitesPendentes, EVENTO_CONVITES_ATUALIZADOS } from '../services/conviteService';
+import { EVENTO_AVISOS_ATUALIZADOS, listarAvisosPendentes } from '../services/avisoService';
 import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
   onToggleMenu: () => void;
 }
 
+// Convites e avisos chegam de ações de outras pessoas (o criador convida,
+// conclui ou cancela o projeto): sem rechecar, o sino só acenderia no F5.
+const INTERVALO_ATUALIZACAO_MS = 60_000;
+
 export default function Header({ onToggleMenu }: HeaderProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [convitesPendentes, setConvitesPendentes] = useState(0);
-  const hasNotifications = convitesPendentes > 0;
+  const [avisosPendentes, setAvisosPendentes] = useState(0);
+  const totalNotificacoes = convitesPendentes + avisosPendentes;
+  const hasNotifications = totalNotificacoes > 0;
 
   useEffect(() => {
-    const atualizar = () => {
+    const atualizarConvites = () => {
       contarConvitesPendentes()
         .then((r) => setConvitesPendentes(r.pendentes))
         .catch(() => setConvitesPendentes(0));
     };
-    atualizar();
-    window.addEventListener(EVENTO_CONVITES_ATUALIZADOS, atualizar);
-    return () => window.removeEventListener(EVENTO_CONVITES_ATUALIZADOS, atualizar);
+    const atualizarAvisos = () => {
+      listarAvisosPendentes()
+        .then((avisos) => setAvisosPendentes(avisos.length))
+        .catch(() => setAvisosPendentes(0));
+    };
+    const atualizarTudo = () => {
+      atualizarConvites();
+      atualizarAvisos();
+    };
+    const aoVoltarParaAba = () => {
+      if (document.visibilityState === 'visible') atualizarTudo();
+    };
+
+    atualizarTudo();
+    const intervalo = window.setInterval(atualizarTudo, INTERVALO_ATUALIZACAO_MS);
+    window.addEventListener(EVENTO_CONVITES_ATUALIZADOS, atualizarConvites);
+    window.addEventListener(EVENTO_AVISOS_ATUALIZADOS, atualizarAvisos);
+    document.addEventListener('visibilitychange', aoVoltarParaAba);
+    return () => {
+      window.clearInterval(intervalo);
+      window.removeEventListener(EVENTO_CONVITES_ATUALIZADOS, atualizarConvites);
+      window.removeEventListener(EVENTO_AVISOS_ATUALIZADOS, atualizarAvisos);
+      document.removeEventListener('visibilitychange', aoVoltarParaAba);
+    };
   }, []);
 
   return (
@@ -54,6 +82,10 @@ export default function Header({ onToggleMenu }: HeaderProps) {
 
         <button
           onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+          aria-label={hasNotifications
+            ? `Notificações (${totalNotificacoes} ${totalNotificacoes === 1 ? 'nova' : 'novas'})`
+            : 'Notificações'}
+          aria-expanded={isNotificationsOpen}
           className="text-white/90 hover:text-white hover:bg-white/20 rounded-full transition-colors relative p-2 drop-shadow-md"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
