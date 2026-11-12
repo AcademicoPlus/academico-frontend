@@ -1,10 +1,11 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState, type FormEvent, type SyntheticEvent } from 'react';
 import { ApiError } from '../services/apiClient';
 import {
   atualizarProjeto,
   alterarStatusProjeto,
   buscarProjetoPorId,
+  inativarProjeto,
   type ProjetoDetalhe,
   type StatusProjeto,
 } from '../services/projetoService';
@@ -198,6 +199,13 @@ function EditarProjeto({ id }: { id: string }) {
   const [erroStatus, setErroStatus] = useState<string | null>(null);
   const [confirmandoCancelamento, setConfirmandoCancelamento] = useState(false);
   const [motivoCancelamento, setMotivoCancelamento] = useState('');
+  // Concluir é irreversível e avisa a equipe: pede confirmação, como o cancelamento.
+  const [confirmandoConclusao, setConfirmandoConclusao] = useState(false);
+
+  const navigate = useNavigate();
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
+  const [erroExclusao, setErroExclusao] = useState<string | null>(null);
 
   useEffect(() => {
     let ativo = true;
@@ -409,11 +417,24 @@ function EditarProjeto({ id }: { id: string }) {
       const atualizado = await alterarStatusProjeto(id, novoStatus, motivo);
       setProjeto(atualizado);
       setConfirmandoCancelamento(false);
+      setConfirmandoConclusao(false);
       setMotivoCancelamento('');
     } catch (erroCapturado) {
       setErroStatus(erroCapturado instanceof ApiError ? erroCapturado.message : 'Não foi possível alterar o status.');
     } finally {
       setAlterandoStatus(false);
+    }
+  }
+
+  async function handleExcluir() {
+    setErroExclusao(null);
+    setExcluindo(true);
+    try {
+      await inativarProjeto(id);
+      navigate('/projetos', { replace: true });
+    } catch (erroCapturado) {
+      setErroExclusao(erroCapturado instanceof ApiError ? erroCapturado.message : 'Não foi possível excluir o projeto.');
+      setExcluindo(false);
     }
   }
 
@@ -836,7 +857,11 @@ function EditarProjeto({ id }: { id: string }) {
                     disabled={desabilitado || eSelecionado}
                     onClick={() => {
                       if (status === 'CANCELADO') {
+                        setConfirmandoConclusao(false);
                         setConfirmandoCancelamento(true);
+                      } else if (status === 'CONCLUIDO') {
+                        setConfirmandoCancelamento(false);
+                        setConfirmandoConclusao(true);
                       } else {
                         handleMudarStatus(status);
                       }
@@ -884,6 +909,34 @@ function EditarProjeto({ id }: { id: string }) {
           );
         })()}
 
+        {/* Confirmação de conclusão */}
+        {confirmandoConclusao && (
+          <div className="rounded-xl border border-purple-200/90 bg-purple-50/60 dark:bg-primary/10 dark:border-primary/30 p-4 sm:p-5 flex flex-col gap-3">
+            <p className="text-sm text-gray-800 dark:text-gray-100 font-medium">
+              Concluir encerra o projeto e libera as avaliações entre os participantes. Todos os membros
+              recebem um aviso para avaliar a equipe. Essa ação não pode ser desfeita.
+            </p>
+            <div className="flex flex-col-reverse sm:flex-row gap-2.5 justify-end pt-1">
+              <button
+                type="button"
+                disabled={alterandoStatus}
+                onClick={() => setConfirmandoConclusao(false)}
+                className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-900 border border-gray-200/90 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                disabled={alterandoStatus}
+                onClick={() => handleMudarStatus('CONCLUIDO')}
+                className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-primary hover:bg-primary/90 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+              >
+                {alterandoStatus ? 'Concluindo...' : 'Confirmar conclusão'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Confirmação de cancelamento */}
         {confirmandoCancelamento && (
           <div className="rounded-xl border border-red-200/90 bg-red-50/60 dark:bg-red-950/30 dark:border-red-900/50 p-4 sm:p-5 flex flex-col gap-3">
@@ -916,6 +969,55 @@ function EditarProjeto({ id }: { id: string }) {
               </button>
             </div>
           </div>
+        )}
+      </section>
+
+      {/* Excluir projeto */}
+      <section className="rounded-2xl border border-red-200/80 dark:border-red-900/50 bg-white dark:bg-slate-900 p-5 sm:p-6 flex flex-col gap-4">
+        <div>
+          <h2 className="text-base font-bold text-red-700 dark:text-red-400">Excluir projeto</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            O projeto deixa de aparecer na plataforma.
+            {!statusFinal && ' Como ainda não foi encerrado, ele também é cancelado e a equipe recebe um aviso.'}
+          </p>
+        </div>
+
+        {erroExclusao && (
+          <p role="alert" className="text-sm text-red-600 dark:text-red-400">{erroExclusao}</p>
+        )}
+
+        {confirmandoExclusao ? (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-red-700 dark:text-red-400 font-medium">
+              Tem certeza? Essa ação não pode ser desfeita.
+            </p>
+            <div className="flex flex-col-reverse sm:flex-row gap-2.5 justify-end">
+              <button
+                type="button"
+                disabled={excluindo}
+                onClick={() => { setConfirmandoExclusao(false); setErroExclusao(null); }}
+                className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-900 border border-gray-200/90 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                disabled={excluindo}
+                onClick={handleExcluir}
+                className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-red-600 hover:bg-red-700 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+              >
+                {excluindo ? 'Excluindo...' : 'Sim, excluir projeto'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirmandoExclusao(true)}
+            className="self-start px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+          >
+            Excluir projeto
+          </button>
         )}
       </section>
 

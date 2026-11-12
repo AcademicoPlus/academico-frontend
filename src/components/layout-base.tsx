@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import Header from './header'
 import MenuLateral from './menu-lateral'
+import AvisosDeProjeto from './AvisosDeProjeto'
 
 export default function LayoutBase() {
   const [menuAberto, setMenuAberto] = useState(false)
@@ -17,6 +18,8 @@ export default function LayoutBase() {
           <Outlet />
         </main>
       </div>
+
+      <AvisosDeProjeto />
     </div>
   )
 }

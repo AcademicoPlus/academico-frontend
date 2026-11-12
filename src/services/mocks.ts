@@ -1255,6 +1255,14 @@ export function mockFetch<TResposta>(caminho: string, { method, body }: MockOpti
         return resolverComAtraso(clonar(denuncia) as unknown as TResposta);
       }
 
+      // Avisos de projeto (concluído/cancelado): em modo mock não há nenhum pendente.
+      if (method === 'GET' && caminhoBase === '/avisos') {
+        return resolverComAtraso([] as unknown as TResposta);
+      }
+      if (method === 'PATCH' && /^\/avisos\/[^/]+\/visualizado$/.test(caminhoBase)) {
+        return resolverComAtraso(undefined as unknown as TResposta);
+      }
+
       const matchAvaliacoesDoUsuario = method === 'GET' && caminhoBase.match(/^\/usuarios\/([^/]+)\/avaliacoes$/);
       if (matchAvaliacoesDoUsuario) {
         return resolverComAtraso(paginar(clonar(AVALIACOES_MOCK)) as unknown as TResposta);

@@ -21,7 +21,10 @@ export default function Login() {
     const temaSalvo = localStorage.getItem('tema');
     if (temaSalvo) return temaSalvo as 'claro' | 'escuro';
     // Se não tiver salvo, pega a preferência do sistema
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+    // Sem matchMedia (navegadores antigos, jsdom nos testes): tema claro.
+    const prefereEscuro = typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefereEscuro ? 'escuro' : 'claro';
   });
 
   const [avisosModeracao, setAvisosModeracao] = useState<Sancao[]>([]);

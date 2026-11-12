@@ -279,11 +279,10 @@ function DetalhesProjeto({ id }: { id: string }) {
   }
 
   // Devolve a mensagem de erro (ou null) para a aba Equipe exibir no formulário.
-  async function handleAvaliar(membro: ProjetoMembro, nota: number, comentario: string | undefined) {
-    if (!membro.usuario) return null;
+  async function handleAvaliar(avaliadoId: string, nota: number, comentario: string | undefined) {
     try {
-      await avaliarParticipante(id, membro.usuario.id, nota, comentario);
-      setAvaliadosNestaSessao((prev) => new Set(prev).add(membro.usuario!.id));
+      await avaliarParticipante(id, avaliadoId, nota, comentario);
+      setAvaliadosNestaSessao((prev) => new Set(prev).add(avaliadoId));
       return null;
     } catch (erroCapturado) {
       return mensagemDeErro(erroCapturado, 'Não foi possível enviar a avaliação.');

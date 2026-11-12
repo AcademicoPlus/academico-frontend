@@ -34,8 +34,8 @@ describe('Cadastro', () => {
 
     renderPagina();
 
-    await userEvent.type(screen.getByPlaceholderText('Luana...'), 'Luana Pereira');
-    await userEvent.type(screen.getByPlaceholderText('luana@academico.edu.br'), 'luana@academico.edu.br');
+    await userEvent.type(screen.getByPlaceholderText('Nome completo'), 'Luana Pereira');
+    await userEvent.type(screen.getByPlaceholderText('E-mail institucional'), 'luana@academico.edu.br');
 
     const selectCurso = await screen.findByRole('combobox');
     await userEvent.selectOptions(selectCurso, 'curso-1');
@@ -65,8 +65,8 @@ describe('Cadastro', () => {
 
     renderPagina();
 
-    await userEvent.type(screen.getByPlaceholderText('Luana...'), 'Luana Pereira');
-    await userEvent.type(screen.getByPlaceholderText('luana@academico.edu.br'), 'luana@academico.edu.br');
+    await userEvent.type(screen.getByPlaceholderText('Nome completo'), 'Luana Pereira');
+    await userEvent.type(screen.getByPlaceholderText('E-mail institucional'), 'luana@academico.edu.br');
 
     const selectCurso = await screen.findByRole('combobox');
     await userEvent.selectOptions(selectCurso, 'curso-1');

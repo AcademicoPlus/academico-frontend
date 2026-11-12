@@ -286,6 +286,48 @@ describe('DetalhesProjeto', () => {
     expect(await screen.findByText(/avaliado/i)).toBeInTheDocument();
   });
 
+  it('permite que um membro avalie o criador em projeto concluído', async () => {
+    // Regressão: só os cards de membro tinham "Avaliar" — o criador não podia ser avaliado pela tela.
+    vi.spyOn(useMeuPerfilHook, 'obterMeuPerfilCache').mockResolvedValue({ id: 'user-2' } as never);
+    vi.spyOn(projetoService, 'buscarProjetoPorId').mockResolvedValue(projetoBase({ status: 'CONCLUIDO', totalMembros: 1 }));
+    vi.spyOn(projetoMembroService, 'listarMembrosDoProjeto').mockResolvedValue([
+      { id: 'membro-1', projeto: null, usuario: CANDIDATO, funcao: null, dataAdesao: '2026-01-01T00:00:00Z' },
+    ]);
+    vi.spyOn(avaliacaoService, 'avaliarParticipante').mockResolvedValue({
+      id: 'aval-2',
+      projeto: { id: 'proj-1', titulo: 'Projeto Teste', status: 'CONCLUIDO' },
+      avaliador: CANDIDATO,
+      nota: 5,
+      comentario: null,
+      criadoEm: '2026-01-04T00:00:00Z',
+    });
+
+    renderPagina('/detalhes/proj-1?aba=equipe');
+
+    const cardCriador = await screen.findByTestId('criador');
+    // O próprio card do membro logado não oferece avaliar a si mesmo.
+    expect(within(screen.getByTestId('membro-membro-1')).queryByRole('button', { name: /avaliar/i })).not.toBeInTheDocument();
+
+    await userEvent.click(within(cardCriador).getByRole('button', { name: /avaliar/i }));
+    await userEvent.click(within(cardCriador).getByRole('button', { name: /enviar avaliação/i }));
+
+    await waitFor(() => expect(avaliacaoService.avaliarParticipante).toHaveBeenCalledWith('proj-1', 'user-1', 5, undefined));
+    expect(await within(cardCriador).findByText(/avaliado/i)).toBeInTheDocument();
+  });
+
+  it('não oferece avaliar o criador enquanto o projeto não foi encerrado', async () => {
+    vi.spyOn(useMeuPerfilHook, 'obterMeuPerfilCache').mockResolvedValue({ id: 'user-2' } as never);
+    vi.spyOn(projetoService, 'buscarProjetoPorId').mockResolvedValue(projetoBase({ status: 'EM_ANDAMENTO', totalMembros: 1 }));
+    vi.spyOn(projetoMembroService, 'listarMembrosDoProjeto').mockResolvedValue([
+      { id: 'membro-1', projeto: null, usuario: CANDIDATO, funcao: null, dataAdesao: '2026-01-01T00:00:00Z' },
+    ]);
+
+    renderPagina('/detalhes/proj-1?aba=equipe');
+
+    const cardCriador = await screen.findByTestId('criador');
+    expect(within(cardCriador).queryByRole('button', { name: /avaliar/i })).not.toBeInTheDocument();
+  });
+
   it('permite que o criador convide um candidato recomendado', async () => {
     vi.spyOn(useMeuPerfilHook, 'obterMeuPerfilCache').mockResolvedValue({ id: 'user-1' } as never);
     vi.spyOn(projetoService, 'buscarProjetoPorId').mockResolvedValue(projetoBase());

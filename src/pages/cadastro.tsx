@@ -27,7 +27,10 @@ export default function Cadastro() {
   const [tema, setTema] = useState<'claro' | 'escuro'>(() => {
     const temaSalvo = localStorage.getItem('tema');
     if (temaSalvo) return temaSalvo as 'claro' | 'escuro';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+    // Sem matchMedia (navegadores antigos, jsdom nos testes): tema claro.
+    const prefereEscuro = typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefereEscuro ? 'escuro' : 'claro';
   });
 
   // Aplica a classe 'dark' no elemento raiz (HTML) quando o tema mudar

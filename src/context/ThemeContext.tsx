@@ -8,7 +8,10 @@ function lerTemaInicial(): Tema {
   if (salvo === 'light' || salvo === 'dark') {
     return salvo;
   }
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  // Sem matchMedia (navegadores antigos, jsdom nos testes): tema claro.
+  const prefereEscuro = typeof window.matchMedia === 'function'
+    && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return prefereEscuro ? 'dark' : 'light';
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
