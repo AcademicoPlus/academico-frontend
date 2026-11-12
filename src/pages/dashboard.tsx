@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { recomendarProjetos, type ProjetoRecomendado } from '../services/recomendacaoService'
 import { listarProjetosVinculados, type Projeto } from '../services/projetoService'
 import { useMeuPerfil } from '../hooks/useMeuPerfil'
+import CardProgressoPerfil from '../components/CardProgressoPerfil'
 import { listarMinhasCandidaturas } from '../services/candidaturaService'
 import { STATUS_PROJETO_BADGE, STATUS_PROJETO_LABEL } from '../utils/projeto'
 import { useToast } from '../hooks/useToast'
@@ -211,6 +212,8 @@ export default function Dashboard() {
               + Novo Projeto
             </Link>
           </div>
+
+          {meuPerfil && <CardProgressoPerfil perfil={meuPerfil} dispensavel />}
 
           {/* Seção Meus Projetos */}
           <div className="flex flex-col gap-4">

@@ -3,7 +3,7 @@
 // Permite alterar foto de perfil (JPG/PNG até 2MB), nome, curso (via listarCursos), bio,
 // links externos (LinkedIn, GitHub) e gerenciar habilidades.
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { apiFetch, ApiError, type PaginaResposta } from '../services/apiClient';
 import {
@@ -312,6 +312,15 @@ export default function EditarPerfil() {
       .finally(() => setVerificando(false));
   }, [id, navigate]);
 
+  // ── 2b. Vindo do card "Complete seu perfil" (#secao-...): rola até a seção
+  // pedida assim que o formulário aparece (antes disso ela nem existe no DOM).
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (verificando || !hash) return;
+    document.getElementById(decodeURIComponent(hash.slice(1)))
+      ?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+  }, [verificando, hash]);
+
   // ── 3. Busca sugestões do catálogo (debounced 350 ms) ─────────────────────
   useEffect(() => {
     if (buscaHabilidade.trim().length < 2) {
@@ -591,7 +600,7 @@ export default function EditarPerfil() {
       </div>
 
       {/* Banner / Cabeçalho com Avatar e Upload de Foto */}
-      <section className="bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)] overflow-hidden">
+      <section id="secao-foto" className="scroll-mt-4 bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)] overflow-hidden">
         {/* Banner Decorativo com Gradiente em Camadas e Blobs Assimétricos */}
         <div className="h-32 sm:h-44 w-full bg-gradient-to-r from-primary/40 via-violet-500/25 to-indigo-100/40 dark:from-primary/45 dark:via-violet-900/35 dark:to-slate-900/90 relative overflow-hidden rounded-t-2xl">
           <div className="absolute -top-10 -right-8 w-64 h-64 bg-primary/20 dark:bg-primary/25 rounded-full blur-3xl pointer-events-none" />
@@ -705,7 +714,7 @@ export default function EditarPerfil() {
       )}
 
       {/* ── Bloco 1: Informações Gerais do Perfil ────────────────────────────── */}
-      <section className="bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)] p-4 sm:p-6 md:p-8 flex flex-col gap-6">
+      <section id="secao-informacoes" className="scroll-mt-4 bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)] p-4 sm:p-6 md:p-8 flex flex-col gap-6">
 
         {/* Título de seção */}
         <div className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-slate-800">
@@ -832,7 +841,7 @@ export default function EditarPerfil() {
       </section>
 
       {/* ── Bloco 2: Habilidades & Competências ─────────────────────────────── */}
-      <section className="bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)] p-4 sm:p-6 md:p-8 flex flex-col gap-6">
+      <section id="secao-habilidades" className="scroll-mt-4 bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)] p-4 sm:p-6 md:p-8 flex flex-col gap-6">
 
         <div className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-slate-800">
           <div className="h-9 w-9 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">

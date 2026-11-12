@@ -11,6 +11,7 @@ import {
   type UsuarioPerfil,
 } from '../services/usuarioService';
 import { obterMeuPerfilCache } from '../hooks/useMeuPerfil';
+import CardProgressoPerfil from '../components/CardProgressoPerfil';
 import {
   listarProjetos,
   listarMeusProjetos,
@@ -448,6 +449,8 @@ export default function Perfil() {
         </div>
       </Card>
 
+      {/* Só no próprio perfil: o que falta preencher (some quando completo) */}
+      {isDono && usuario && <CardProgressoPerfil perfil={usuario} />}
 
       {/* Seção: Habilidades com Grid de Cards e Barra de Progresso */}
       <Card className="p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)]">
